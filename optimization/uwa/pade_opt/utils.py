@@ -3,12 +3,12 @@ import cmath as cm
 import math as fm
 import numpy as np
 
-from jcs.d2_error import second_order_error_kz, fourth_order_error_kz
+from examples.jcs.d2_error import second_order_error_kz, fourth_order_error_kz
 from propagators._utils import pade_propagator_coefs
 
 import pyximport
 pyximport.install(setup_args={"include_dirs": np.get_include()}, language_level=3)
-from optimization.uwa.pade_opt import utils_pyx as utils_pyx
+from examples.optimization.uwa.pade_opt import utils_pyx as utils_pyx
 
 
 def h_error(dz, k_z_max, z_order=4):

@@ -1,6 +1,6 @@
 from uwa.propagators import *
 from uwa.vis import AcousticPressureFieldVisualiser2d
-from optimization.uwa.pade_opt.utils import get_optimal
+from examples.optimization.uwa.pade_opt.utils import get_optimal
 
 #logging.basicConfig(level=logging.DEBUG)
 
