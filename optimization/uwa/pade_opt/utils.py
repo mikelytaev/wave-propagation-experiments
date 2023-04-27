@@ -3,12 +3,29 @@ import cmath as cm
 import math as fm
 import numpy as np
 
-from examples.jcs.d2_error import second_order_error_kz, fourth_order_error_kz
 from propagators._utils import pade_propagator_coefs
 
 import pyximport
 pyximport.install(setup_args={"include_dirs": np.get_include()}, language_level=3)
 from examples.optimization.uwa.pade_opt import utils_pyx as utils_pyx
+
+
+def second_difference_disp_rel(k_z: complex, dz: float, z=0):
+    return cm.exp(1j*k_z*z) * (cm.exp(-1j*k_z*dz) - 2 + cm.exp(1j*k_z*dz))
+
+
+def fourth_difference_disp_rel(k_z: complex, dz: float, z=0):
+    return cm.exp(1j*k_z*z) * (cm.exp(-1j*k_z*dz) - 2 + cm.exp(1j*k_z*dz))**2
+
+
+def second_order_error_kz(k_z: float, dz: float):
+    d = 1 / dz**2 * second_difference_disp_rel(k_z, dz)
+    return abs(d - (-k_z**2))
+
+
+def fourth_order_error_kz(k_z: float, dz: float):
+    d = 1 / dz**2 * (second_difference_disp_rel(k_z, dz) - 1/12 * fourth_difference_disp_rel(k_z, dz))
+    return abs(d - (-k_z**2))
 
 
 def h_error(dz, k_z_max, z_order=4):

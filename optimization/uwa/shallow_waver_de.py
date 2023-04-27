@@ -17,7 +17,7 @@ import propagators._utils as utils
 from uwa.field import *
 from uwa.source import *
 from uwa.environment import *
-from uwa.propagators import *
+from uwa.sspade import *
 from uwa.utils import *
 
 from uwa.vis import AcousticPressureFieldVisualiser2d

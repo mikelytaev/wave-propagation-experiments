@@ -1,4 +1,4 @@
-from uwa.propagators import *
+from uwa.sspade import *
 from uwa.vis import AcousticPressureFieldVisualiser2d
 from matplotlib.colors import Normalize
 import matplotlib.pyplot as plt

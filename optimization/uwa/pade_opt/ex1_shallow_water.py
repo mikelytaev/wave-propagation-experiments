@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-from uwa.propagators import *
+from uwa.sspade import *
 from uwa.vis import AcousticPressureFieldVisualiser2d
 from matplotlib.colors import Normalize
 from optimization.uwa.pade_opt.utils import get_optimal

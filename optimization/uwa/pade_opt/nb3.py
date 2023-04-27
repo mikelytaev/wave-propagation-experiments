@@ -1,4 +1,4 @@
-from uwa.propagators import *
+from uwa.sspade import *
 from uwa.vis import AcousticPressureFieldVisualiser2d
 from examples.optimization.uwa.pade_opt.utils import get_optimal
 

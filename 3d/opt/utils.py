@@ -2,7 +2,7 @@ import math as fm
 
 import propagators._utils as utils
 
-from chebyshev_pade.cheb_pade_coefs import *
+from examples.chebyshev_pade.cheb_pade_coefs import *
 
 
 def err_2d(*, freq_hz, dx_m, dz_m, theta_max_degrees, pade_order, z_order=4, shift=False, adi=False, n=200, k_z_bounds=None):

@@ -1,4 +1,4 @@
-from uwa.propagators import *
+from uwa.sspade import *
 from optimization.uwa.pade_opt.utils import get_optimal
 
 #logging.basicConfig(level=logging.DEBUG)
