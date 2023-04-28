@@ -2,11 +2,11 @@ from uwa.sspade import *
 from uwa.vis import AcousticPressureFieldVisualiser2d
 from matplotlib.colors import Normalize
 import matplotlib.pyplot as plt
-from optimization.uwa.pade_opt.utils import get_optimal
+from examples.optimization.uwa.pade_opt.utils import get_optimal
 
 logging.basicConfig(level=logging.DEBUG)
 
-src = GaussSource(freq_hz=1000, depth=100, beam_width=1, eval_angle=-30)
+src = GaussSource(freq_hz=1000, depth_m=100, beam_width_deg=1, eval_angle_deg=-30)
 env = UnderwaterEnvironment()
 env.sound_speed_profile_m_s = lambda x, z: 1500 + z
 env.bottom_profile = Bathymetry(ranges_m=[0, 5000], depths_m=[500, 500])
