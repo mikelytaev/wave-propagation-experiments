@@ -3,7 +3,6 @@ from uwa.source import *
 from uwa.environment import *
 from uwa.sspade import *
 from uwa.ram import *
-from uwa.utils import *
 from examples.optimization.uwa.pade_opt.utils import get_optimal
 from matplotlib.colors import Normalize
 import matplotlib.pyplot as plt
