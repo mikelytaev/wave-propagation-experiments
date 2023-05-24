@@ -15,7 +15,7 @@ env_evaporation.z_max = 600
 env_evaporation.terrain = Terrain(ground_material=PerfectlyElectricConducting())
 env_evaporation.M_profile = lambda x, z: evaporation_duct(30, z)
 
-ant = GaussAntenna(freq_hz=10000e6, height=30, beam_width=3, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=10000e6, height=30, beam_width=3, elevation_angle=0, polarz='H')
 
 max_propagation_angle = 3
 max_range_m = 200e3

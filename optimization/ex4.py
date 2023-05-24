@@ -69,7 +69,7 @@ profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 50], fill_value="extrap
 #env.vegetation = [Impediment(x1=36e3, x2=101e3, height=18, material=CustomMaterial(eps=1.004, sigma=180e-6))]
 env.M_profile = lambda x, z: profile1d(z)
 
-ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=4, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=4, elevation_angle=0, polarz='H')
 
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=150e3, comp_params=
                                                   HelmholtzPropagatorComputationalParams(

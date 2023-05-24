@@ -11,7 +11,7 @@ environment.ground_material = PerfectlyElectricConducting()
 environment.z_max = 300
 environment.M_profile = lambda x, z: elevated_duct(z)
 environment.knife_edges = [KnifeEdge(range=70e3, height=150)]
-antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100000
 
 computational_params78 = HelmholtzPropagatorComputationalParams(exp_pade_order=(7, 8), z_order=2, dx_wl=400, dz_wl=1,

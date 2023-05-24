@@ -9,7 +9,7 @@ env.z_max = 100
 env.terrain = InterpTerrain([0, 70, 70.0001, 80, 80.00001, 160, 160.000001, 170, 170.000001, 210], [0, 0, 15, 15, 0, 0, 50, 50, 0, 0])
 max_range = 200
 
-ant_mm = GaussAntenna(freq_hz=30000e6, height=10, beam_width=10, eval_angle=0, polarz='H')
+ant_mm = GaussAntenna(freq_hz=30000e6, height=10, beam_width=10, elevation_angle=0, polarz='H')
 
 pade_task_mm = PETOOLPropagationTask(antenna=ant_mm, env=env, two_way=False, max_range_m=max_range, dx_wl=30, dz_wl=1, n_dz_out=5, n_dx_out=1)
 pade_field_mm = pade_task_mm.calculate()

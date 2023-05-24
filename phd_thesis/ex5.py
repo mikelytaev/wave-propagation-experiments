@@ -11,7 +11,7 @@ elevated_duct = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 50], fill_value="ex
 environment.M_profile = lambda x, z: elevated_duct(z)
 environment.knife_edges = [KnifeEdge(range=70e3, height=150)]
 
-antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100000
 pade_comp_params = HelmholtzPropagatorComputationalParams(two_way=True, max_propagation_angle=10, dx_wl=100)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range,

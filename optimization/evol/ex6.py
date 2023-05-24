@@ -202,7 +202,7 @@ env.z_max = 3000
 env.terrain = Terrain(ground_material=PerfectlyElectricConducting())
 env.knife_edges = [KnifeEdge(range=1.5e3, height=1500)]
 
-ant = GaussAntenna(freq_hz=300e6, height=1500, beam_width=45, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=300e6, height=1500, beam_width=45, elevation_angle=0, polarz='H')
 
 max_propagation_angle = theta_max_degrees
 max_range_m = eps_x_max*3

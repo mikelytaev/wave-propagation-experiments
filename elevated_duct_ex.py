@@ -10,7 +10,7 @@ environment.ground_material = VeryDryGround()
 environment.z_max = 300
 profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 45], fill_value="extrapolate")
 environment.M_profile = lambda x, z: profile1d(z)
-antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 150000
 
 params = HelmholtzPropagatorComputationalParams()

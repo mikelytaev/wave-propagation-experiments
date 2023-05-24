@@ -13,10 +13,10 @@ environment.vegetation = [Impediment(x1=0, x2=1000, height=10, material=environm
 
 b_angle = brewster_angle(1, environment.ground_material.complex_permittivity(3e9))
 
-antenna = GaussAntenna(freq_hz=3000e6, height=50, beam_width=0.3, eval_angle=90-b_angle, polarz='V')
+antenna = GaussAntenna(freq_hz=3000e6, height=50, beam_width=0.3, elevation_angle=90-b_angle, polarz='V')
 h1 = antenna.height_m
 h2 = environment.vegetation[0].height
-a = abs((h1 - h2) / cm.tan(antenna.eval_angle * cm.pi / 180))
+a = abs((h1 - h2) / cm.tan(antenna.elevation_angle * cm.pi / 180))
 max_range = 2 * a + 20
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, two_way=False, max_range_m=max_range, pade_order=(7, 8), max_angle=10, z_order=4)
 pade_field = pade_task.calculate()

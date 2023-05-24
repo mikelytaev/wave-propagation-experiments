@@ -34,7 +34,7 @@ env.z_max = 1000
 elevated_duct = interp1d(x=[0, 100, 170, 300], y=[0, 32, 10, 50], fill_value="extrapolate")
 env.M_profile = lambda x, z: elevated_duct(z)
 
-ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, eval_angle=0, polarz='H')
+ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, elevation_angle=0, polarz='H')
 
 
 cheb_pade_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=max_range_m, comp_params=

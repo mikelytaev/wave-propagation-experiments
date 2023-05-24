@@ -12,7 +12,7 @@ env.z_max = 1000
 
 max_range_m = 300E3
 
-ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=2, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=2, elevation_angle=0, polarz='H')
 
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=max_range_m, comp_params=
                                                   HelmholtzPropagatorComputationalParams(

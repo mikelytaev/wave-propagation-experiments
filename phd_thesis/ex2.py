@@ -15,7 +15,7 @@ x1 = 30000
 environment.terrain = Terrain(lambda x: h/2*(1 + fm.sin(fm.pi * (x - x1) / (2*w))) if -w <= (x-x1) <= 3*w else 0)
 environment.ground_material = VeryDryGround()
 
-antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100e3
 comp_params = HelmholtzPropagatorComputationalParams(terrain_method=TerrainMethod.pass_through)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range, comp_params=comp_params)

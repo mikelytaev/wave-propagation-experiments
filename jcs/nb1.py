@@ -16,7 +16,7 @@ env.z_max = 300
 env.terrain = Terrain(elevation=lambda x: pyramid2(x, 20, 150, 5e3), ground_material=PerfectlyElectricConducting())
 #env.knife_edges = [KnifeEdge(range=3e3, height=150)]
 
-ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, eval_angle=0, polarz='H')
+ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, elevation_angle=0, polarz='H')
 
 
 cheb_pade_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=max_range_m, comp_params=

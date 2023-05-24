@@ -13,7 +13,7 @@ max_range = 1000
 #profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 45], fill_value="extrapolate")
 profile1d = interp1d(x=[0, 5, 70, 100, 300], y=[0, 0, -30, 0, 0], fill_value="extrapolate")
 environment.M_profile = lambda x, z: profile1d(z)
-antenna = GaussAntenna(freq_hz=100e6, height=100, beam_width=15, eval_angle=30, polarz='V')
+antenna = GaussAntenna(freq_hz=100e6, height=100, beam_width=15, elevation_angle=30, polarz='V')
 
 propagator = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range,
                                                    comp_params=HelmholtzPropagatorComputationalParams(

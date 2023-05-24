@@ -3,7 +3,7 @@ from rwp.field import *
 from rwp.vis import *
 
 
-ant = GaussAntenna(freq_hz=5900e6, height=4, beam_width=14, eval_angle=0, polarz='V')#Source(freq_hz=5900e6, height_m=4, polarz='V')#
+ant = GaussAntenna(freq_hz=5900e6, height=4, beam_width=14, elevation_angle=0, polarz='V')#Source(freq_hz=5900e6, height_m=4, polarz='V')#
 env = Troposphere(flat=True)
 env.z_max = 20
 env.terrain = Terrain(ground_material=CustomMaterial(eps=1, sigma=1000000000))

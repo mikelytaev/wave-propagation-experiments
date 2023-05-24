@@ -10,7 +10,7 @@ from uwa.vis import AcousticPressureFieldVisualiser2d
 
 logging.basicConfig(level=logging.DEBUG)
 
-src = GaussSource(freq_hz=50, depth_m=100, beam_width_deg=60, eval_angle_deg=0)
+src = GaussSource(freq_hz=50, depth_m=100, beam_width_deg=60, elevation_angle_deg=0)
 env = UnderwaterEnvironment()
 env.sound_speed_profile_m_s = lambda x, z: munk_profile(z)
 env.bottom_profile = Bathymetry(ranges_m=[0], depths_m=[5000])

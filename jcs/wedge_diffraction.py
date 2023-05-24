@@ -21,7 +21,7 @@ interp_ff = lambda x : interp_f([x])[0]
 env.terrain = Terrain(elevation=interp_ff, ground_material=PerfectlyElectricConducting())
 #env.knife_edges = [KnifeEdge(range=3e3, height=150)]
 
-ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, eval_angle=0, polarz='H')
+ant = GaussAntenna(wavelength=wl, height=150, beam_width=4, elevation_angle=0, polarz='H')
 
 
 etalon_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=max_range_m, comp_params=

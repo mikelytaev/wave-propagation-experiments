@@ -10,7 +10,7 @@ environment.ground_material = SaltWater()
 environment.z_max = 300
 max_range = 1000
 
-antenna = GaussAntenna(freq_hz=10e9, height=30, beam_width=2, eval_angle=0, polarz='V')
+antenna = GaussAntenna(freq_hz=10e9, height=30, beam_width=2, elevation_angle=0, polarz='V')
 
 propagator = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range,
                                                    comp_params=HelmholtzPropagatorComputationalParams(

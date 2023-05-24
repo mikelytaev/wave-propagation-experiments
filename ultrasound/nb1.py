@@ -24,7 +24,7 @@ src = GaussSource(
     freq_hz=31.4E3,
     depth_m=2,
     beam_width_deg=20,
-    eval_angle_deg=-60,
+    elevation_angle_deg=-60,
     multiplier=0.1
 )
 

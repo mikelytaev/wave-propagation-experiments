@@ -13,7 +13,7 @@ env.knife_edges = [KnifeEdge(range=100, height=25),
                    KnifeEdge(range=300, height=75),
                    KnifeEdge(range=600, height=50),
                    KnifeEdge(range=800, height=125)]
-antenna = GaussAntenna(freq_hz=300e6, height=50, beam_width=15, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=300e6, height=50, beam_width=15, elevation_angle=0, polarz='H')
 
 
 kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=env, max_range_m=1000)

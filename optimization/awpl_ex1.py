@@ -40,7 +40,7 @@ env.z_max = 300
 env.terrain = Terrain(elevation=elev_int_1d, ground_material=FreshWater())
 profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 40], fill_value="extrapolate")
 
-ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=4, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=70, beam_width=4, elevation_angle=0, polarz='H')
 
 pade_task_4 = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=150e3, comp_params=
                                                   HelmholtzPropagatorComputationalParams(

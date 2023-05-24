@@ -15,10 +15,10 @@ environment.ground_material = CustomMaterial(eps=3, sigma=0)
 freq_hz = 3000e6
 b_angle = brewster_angle(1, environment.ground_material.complex_permittivity(freq_hz))
 
-antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, eval_angle=(90-b_angle).real, polarz='V')
+antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, elevation_angle=(90-b_angle).real, polarz='V')
 h1 = antenna.height_m
 h2 = 0
-a = abs((h1 - h2) / cm.tan(abs(antenna.eval_angle) * cm.pi / 180))
+a = abs((h1 - h2) / cm.tan(abs(antenna.elevation_angle) * cm.pi / 180))
 max_range = 2 * a + 200
 
 trm = TwoRayModel(src=antenna, env=environment)

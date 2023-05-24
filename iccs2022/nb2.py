@@ -172,7 +172,7 @@ elevation = lambda x: pyramid2(x, 20, 200, 1.5e3)
 env.terrain = Terrain(elevation=elevation, ground_material=PerfectlyElectricConducting())
 #env.knife_edges = [KnifeEdge(range=1.5e3, height=1500)]
 
-ant = GaussAntenna(freq_hz=1000e6, height=200, beam_width=theta_max_degrees-5, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=1000e6, height=200, beam_width=theta_max_degrees-5, elevation_angle=0, polarz='H')
 
 max_propagation_angle = theta_max_degrees
 max_range_m = eps_x_max

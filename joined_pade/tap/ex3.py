@@ -29,7 +29,7 @@ env.terrain = Terrain(elevation=eval_func, ground_material=PerfectlyElectricCond
 profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 40], fill_value="extrapolate")
 env.M_profile = lambda x, z: profile1d(z)
 
-ant = GaussAntenna(freq_hz=1500e6, height=100, beam_width=3, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=1500e6, height=100, beam_width=3, elevation_angle=0, polarz='H')
 
 max_propagation_angle = 10
 max_range_m = x_grid[-1]

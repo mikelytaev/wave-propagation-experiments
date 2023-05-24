@@ -16,7 +16,7 @@ environment.ground_material = VeryDryGround()
 profile1d = interp1d(x=[0, 100, 150, 300], y=[0, 32, 10, 50], fill_value="extrapolate")
 environment.M_profile = lambda x, z: profile1d(z)
 
-antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100e3
 comp_params = HelmholtzPropagatorComputationalParams(terrain_method=TerrainMethod.pass_through)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range, comp_params=comp_params)

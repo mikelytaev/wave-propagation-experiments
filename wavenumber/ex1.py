@@ -14,7 +14,7 @@ wnparams = WaveNumberIntegratorParams(fcc_tol=1e-9,
                                       max_p_k0=1000,
                                       lower_refl_coef=lambda theta: reflection_coef(1+1e-4j, 3, 90-theta, 'V'))
 wavelength = 0.1
-antenna = GaussAntenna(freq_hz=LIGHT_SPEED/wavelength, height=50, beam_width=0.3, eval_angle=30, polarz='V')
+antenna = GaussAntenna(freq_hz=LIGHT_SPEED/wavelength, height=50, beam_width=0.3, elevation_angle=30, polarz='V')
 wnp = WaveNumberIntegrator(k0=2*cm.pi / wavelength, initial_func=lambda z: antenna.aperture(z), params=wnparams)
 #wnp = WaveNumberIntegrator(k0=2*cm.pi / wavelength, initial_func=DeltaFunction(x_c=50), params=wnparams)
 res = wnp.calculate()

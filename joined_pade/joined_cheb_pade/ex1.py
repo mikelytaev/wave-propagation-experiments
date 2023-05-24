@@ -118,7 +118,7 @@ env = Troposphere(flat=True)
 env.z_max = 200
 env.terrain = Terrain(elevation=lambda x: pyramid2(x, 20, 100, 1.5e3), ground_material=PerfectlyElectricConducting())
 
-ant = GaussAntenna(freq_hz=3000e6, height=env.z_max/2, beam_width=3, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=env.z_max/2, beam_width=3, elevation_angle=0, polarz='H')
 
 max_propagation_angle = theta_max
 max_range_m = 3e3

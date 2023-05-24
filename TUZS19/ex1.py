@@ -12,8 +12,8 @@ x1 = 3000
 env.terrain = Terrain(lambda x: h/2*(1 + fm.sin(fm.pi * (x - x1) / (2*w))) if -w <= (x-x1) <= 3*w else 0)
 max_range = 10000
 
-ant_mm = GaussAntenna(freq_hz=30000e6, height=10, beam_width=10, eval_angle=0, polarz='H')
-ant_uhf = GaussAntenna(freq_hz=300e6, height=10, beam_width=10, eval_angle=0, polarz='H')
+ant_mm = GaussAntenna(freq_hz=30000e6, height=10, beam_width=10, elevation_angle=0, polarz='H')
+ant_uhf = GaussAntenna(freq_hz=300e6, height=10, beam_width=10, elevation_angle=0, polarz='H')
 
 comp_params = HelmholtzPropagatorComputationalParams(exp_pade_order=(7, 8))
 pade_task_mm = TroposphericRadioWaveSSPadePropagator(antenna=ant_mm, env=env, max_range_m=max_range, comp_params=comp_params)

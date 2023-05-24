@@ -10,12 +10,12 @@ environment.ground_material = PerfectlyElectricConducting()
 
 freq_hz = 3000e6
 
-antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=2, eval_angle=0, polarz='V')
+antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=2, elevation_angle=0, polarz='V')
 max_range = 10000
 
 pade_params = HelmholtzPropagatorComputationalParams(two_way=False,
                                                      exp_pade_order=(7, 8),
-                                                     max_propagation_angle=abs(antenna.eval_angle)+3,
+                                                     max_propagation_angle=abs(antenna.elevation_angle)+3,
                                                      z_order=4,
                                                      dx_wl=500,
                                                      inv_z_transform_tau=1/1.01,

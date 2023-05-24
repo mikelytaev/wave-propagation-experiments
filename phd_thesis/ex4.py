@@ -10,7 +10,7 @@ env.terrain = InterpTerrain(terr[:, 0], terr[:, 1]-320, kind='linear', ground_ma
 vegetation_x = np.loadtxt('vegetation_x.txt')
 env.vegetation = [Impediment(x1=a, x2=b, height=18, material=CustomMaterial(eps=1.004, sigma=180e-6))
                   for a, b in zip(vegetation_x[0::2], vegetation_x[1::2])]
-ant = GaussAntenna(freq_hz=1599.5e6, height=360 + 22.9 - 320, beam_width=5, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=1599.5e6, height=360 + 22.9 - 320, beam_width=5, elevation_angle=0, polarz='H')
 max_range = 11000
 comp_params = HelmholtzPropagatorComputationalParams(terrain_method=TerrainMethod.staircase)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=ant, env=env, max_range_m=max_range)

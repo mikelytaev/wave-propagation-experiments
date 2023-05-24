@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.DEBUG)
 
-src = GaussSource(freq_hz=500, depth_m=50, beam_width_deg=5, eval_angle_deg=-30)
+src = GaussSource(freq_hz=500, depth_m=50, beam_width_deg=5, elevation_angle_deg=-30)
 env = UnderwaterEnvironment()
 env.sound_speed_profile_m_s = lambda x, z: 1500 + z/2*0
 env.bottom_profile = Bathymetry(ranges_m=[0, 5000], depths_m=[200, 200])

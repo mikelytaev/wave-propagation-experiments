@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 environment = Troposphere()
 environment.ground_material = SaltWater()
 
-antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 150e3
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range)
 pade_field = pade_task.calculate()

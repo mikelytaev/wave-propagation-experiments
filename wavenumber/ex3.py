@@ -11,12 +11,12 @@ profile1d = interp1d(x=[0, 70, 100], y=[330-330, 320-330, 0], fill_value="extrap
 environment.M_profile = lambda x, z: profile1d(z)
 freq_hz = 5000e6
 
-antenna = GaussAntenna(freq_hz=freq_hz, height=25, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(freq_hz=freq_hz, height=25, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100000
 
 pade_params = HelmholtzPropagatorComputationalParams(two_way=False,
                                                      exp_pade_order=(7, 8),
-                                                     max_propagation_angle=abs(antenna.eval_angle)+5,
+                                                     max_propagation_angle=abs(antenna.elevation_angle)+5,
                                                      z_order=4)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range, comp_params=pade_params)
 pade_field = pade_task.calculate()

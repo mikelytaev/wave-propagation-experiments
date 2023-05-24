@@ -17,15 +17,15 @@ environment.terrain = Terrain(ground_material=ground_material)
 freq_hz = 3000e6
 b_angle = brewster_angle(1, ground_material.complex_permittivity(freq_hz)).real
 
-antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, eval_angle=90-b_angle, polarz='V')
+antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, elevation_angle=90-b_angle, polarz='V')
 h1 = antenna.height_m
 h2 = 0
-a = abs((h1 - h2) / cm.tan(abs(antenna.eval_angle) * cm.pi / 180))
+a = abs((h1 - h2) / cm.tan(abs(antenna.elevation_angle) * cm.pi / 180))
 max_range = 2 * a + 200
 
 pade_params = HelmholtzPropagatorComputationalParams(two_way=False,
                                                      exp_pade_order=(7, 8),
-                                                     max_propagation_angle=abs(antenna.beam_width) + abs(antenna.eval_angle) + 5,
+                                                     max_propagation_angle=abs(antenna.beam_width) + abs(antenna.elevation_angle) + 5,
                                                      terrain_method=TerrainMethod.staircase,
                                                      z_order=5,
                                                      dx_wl=2,

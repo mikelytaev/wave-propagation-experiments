@@ -121,7 +121,7 @@ env.z_max = 250
 elevated_duct = interp1d(x=[0, 150, 300], y=[0, -5, 5], fill_value="extrapolate")
 env.M_profile = lambda x, z: elevated_duct(z)
 
-ant = GaussAntenna(freq_hz=3000e6, height=200, beam_width=3, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=200, beam_width=3, elevation_angle=0, polarz='H')
 
 max_propagation_angle = theta_max
 max_range_m = 700e3

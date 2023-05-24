@@ -16,7 +16,7 @@ env.terrain = Terrain(
     elevation=lambda x: h/2*(1 + fm.sin(fm.pi * (x - x1) / (2*w))) if -w <= (x-x1) <= 3*w else 0,
     ground_material=VeryDryGround()
 )
-ant = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 100000
 
 computational_params = HelmholtzPropagatorComputationalParams(exp_pade_order=(7, 8), z_order=2, dx_wl=400, dz_wl=1,

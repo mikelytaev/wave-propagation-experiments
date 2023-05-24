@@ -14,14 +14,14 @@ freq_hz = 3000e6
 b_angle = brewster_angle(1, environment.ground_material.complex_permittivity(freq_hz))
 
 #b_angle=70
-antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=0.3, eval_angle=(90-b_angle), polarz='V')
+antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=0.3, elevation_angle=(90-b_angle), polarz='V')
 h1 = antenna.height_m
 h2 = 0
-a = abs((h1 - h2) / cm.tan(abs(antenna.eval_angle) * cm.pi / 180))
+a = abs((h1 - h2) / cm.tan(abs(antenna.elevation_angle) * cm.pi / 180))
 max_range = 2 * a + 20 + 100 + 100
 params = HelmholtzPropagatorComputationalParams(two_way=False,
                                                 exp_pade_order=(7, 8),
-                                                max_propagation_angle=abs(antenna.eval_angle)+5,
+                                                max_propagation_angle=abs(antenna.elevation_angle)+5,
                                                 z_order=4)
 pade_task = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range, comp_params=params)
 pade_field = pade_task.calculate()

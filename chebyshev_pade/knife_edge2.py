@@ -17,7 +17,7 @@ env.knife_edges = [KnifeEdge(range=0.1e3, height=10),
                    KnifeEdge(range=0.25e3, height=50),
                    KnifeEdge(range=0.40e3, height=75)]
 
-ant = GaussAntenna(freq_hz=3000e6, height=50, beam_width=20, eval_angle=0, polarz='H')
+ant = GaussAntenna(freq_hz=3000e6, height=50, beam_width=20, elevation_angle=0, polarz='H')
 
 max_range_m = 0.5e3
 

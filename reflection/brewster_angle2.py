@@ -14,12 +14,12 @@ environment.ground_material = WetGround()
 freq_hz = 3000e6
 b_angle = brewster_angle(1, environment.ground_material.complex_permittivity(freq_hz)).real
 
-antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, eval_angle=90-b_angle, polarz='V')
+antenna = GaussAntenna(freq_hz=freq_hz, height=50, beam_width=5, elevation_angle=90-b_angle, polarz='V')
 max_range = 2000
 
 pade_params = HelmholtzPropagatorComputationalParams(two_way=True,
                                                      exp_pade_order=(7, 8),
-                                                     max_propagation_angle=abs(antenna.beam_width) + abs(antenna.eval_angle) + 5,
+                                                     max_propagation_angle=abs(antenna.beam_width) + abs(antenna.elevation_angle) + 5,
                                                      z_order=5,
                                                      dx_wl=2,
                                                      dz_wl=0.2,

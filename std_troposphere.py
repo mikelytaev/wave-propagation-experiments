@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.DEBUG)
 environment = Troposphere()
 environment.ground_material = WetGround()
 environment.z_max = 300
-antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, eval_angle=0, polarz='H')
+antenna = GaussAntenna(wavelength=0.1, height=30, beam_width=2, elevation_angle=0, polarz='H')
 max_range = 150e3
 propagator = TroposphericRadioWaveSSPadePropagator(antenna=antenna, env=environment, max_range_m=max_range)
 field = propagator.calculate()
