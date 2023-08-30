@@ -22,24 +22,16 @@ params = RWPSSpadeComputationalParams(
     storage=PickleStorage()
 )
 
-expected_height = 100
-expected_strength=20
+expected_height = 50
 n = 10
 heights = np.random.normal(expected_height, 5, n)
-environment.M_profile = lambda x, z: surface_duct(height_m=expected_height, strength=expected_strength, z_grid_m=z)
+environment.M_profile = lambda x, z: trilinear_duct(height1_m=expected_height, height2_m=100, m_0=320, m_1=350, m_2=320, z_grid_m=z)
 expected_field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
 error = Field(expected_field.x_grid, expected_field.z_grid, freq_hz=antenna.freq_hz)
 
-# for height in heights:
-#     print(height)
-#     environment.M_profile = lambda x, z: surface_duct(height_m=height, strength=expected_strength, z_grid_m=z)
-#     field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
-#     error.field += (10*np.log10(np.abs(field.field+1e-16)) - 10*np.log10(np.abs(expected_field.field+1e-16)))**2
-
-strengths = np.random.normal(expected_strength, 5, n)
-for strength in strengths:
-    print(strength)
-    environment.M_profile = lambda x, z: surface_duct(height_m=expected_height, strength=strength, z_grid_m=z)
+for height in heights:
+    print(height)
+    environment.M_profile = lambda x, z: trilinear_duct(height1_m=height, height2_m=100, m_0=320, m_1=350, m_2=320, z_grid_m=z)
     field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
     error.field += (10*np.log10(np.abs(field.field+1e-16)) - 10*np.log10(np.abs(expected_field.field+1e-16)))**2
 
