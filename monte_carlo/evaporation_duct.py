@@ -54,7 +54,7 @@ plt.tight_layout()
 plt.grid(True)
 plt.show()
 
-plt = vis_error.plot_hor(3)
+plt = vis_error.plot_hors(1, 3, 10)
 plt.xlabel('Range (km)')
 plt.ylabel('10log|u|')
 plt.tight_layout()
