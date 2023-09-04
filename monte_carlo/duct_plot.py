@@ -2,15 +2,15 @@ import numpy as np
 from matplotlib.colors import Normalize
 from scipy.stats import norm
 
-from rwp.environment import surface_duct
+from rwp.environment import surface_duct, evaporation_duct
 import matplotlib.pyplot as plt
 import math as fm
 
 
-def plot_profile_prop_density(profile_func, generator):
+def plot_profile_prop_density(profile_func, generator, max_height_m=300):
     n = 1000
     x_n = 1000
-    z_grid_m = np.linspace(0, 300, 1000)
+    z_grid_m = np.linspace(0, max_height_m, 1000)
     pic = np.zeros((x_n, len(z_grid_m))) + 1e-16
     vals = [generator() for _ in range(0, n)]
     m_min, m_max = fm.inf, 0
@@ -27,7 +27,7 @@ def plot_profile_prop_density(profile_func, generator):
 
     plt.figure(figsize=(3, 5))
     extent = [m_min, m_max, 0, z_grid_m[-1]]
-    plt.imshow((pic.T[::-1, :]), norm=Normalize(0, 0.04), extent=extent, aspect='auto', cmap=plt.get_cmap('binary'))
+    plt.imshow((pic.T[::-1, :]), norm=Normalize(0, 0.01), extent=extent, aspect='auto', cmap=plt.get_cmap('binary'))
     plt.colorbar(location='right')
     plt.grid(True)
     plt.tight_layout()
@@ -37,10 +37,17 @@ def plot_profile_prop_density(profile_func, generator):
 
 
 
-expected_height = 100
+expected_height = 20
 expected_strength = 20
 n = 1000
 m_0 = 320
 
-plot_profile_prop_density(lambda z, v: surface_duct(height_m=v, strength=expected_strength, z_grid_m=z, m_0=m_0),
-                          generator=lambda : np.random.normal(expected_height, 5))
+
+if __name__ == "__main__":
+    #plot_profile_prop_density(lambda z, v: surface_duct(height_m=v, strength=expected_strength, z_grid_m=z, m_0=m_0),
+    #                          generator=lambda : np.random.normal(expected_height, 5))
+
+    plot_profile_prop_density(lambda z, v: evaporation_duct(height=v, z_grid_m=z, m_0=m_0),
+                              generator=lambda : np.random.normal(expected_height, 5),
+                              max_height_m=300
+                              )
