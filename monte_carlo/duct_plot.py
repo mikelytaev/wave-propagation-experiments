@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math as fm
 
 
-def plot_profile_prop_density(profile_func, generator, max_height_m=300):
+def plot_profile_prop_density(profile_func, generator, ax, max_height_m=300, m_bounds=None):
     n = 1000
     x_n = 1000
     z_grid_m = np.linspace(0, max_height_m, 1000)
@@ -25,29 +25,62 @@ def plot_profile_prop_density(profile_func, generator, max_height_m=300):
 
     pic /= len(vals)
 
-    plt.figure(figsize=(3, 5))
+    if m_bounds:
+        m_min, m_max = m_bounds[0], m_bounds[1]
     extent = [m_min, m_max, 0, z_grid_m[-1]]
-    plt.imshow((pic.T[::-1, :]), norm=Normalize(0, 0.01), extent=extent, aspect='auto', cmap=plt.get_cmap('binary'))
-    plt.colorbar(location='right')
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
+    im = ax.imshow((pic.T[::-1, :]), norm=Normalize(0, 0.02), extent=extent, aspect='auto', cmap=plt.get_cmap('binary'))
+    #plt.colorbar(location='right')
+    ax.grid(True)
+    #plt.tight_layout()
+    #plt.show()
+    return im
 
 
-
-
-
-expected_height = 20
-expected_strength = 20
-n = 1000
-m_0 = 320
 
 
 if __name__ == "__main__":
-    #plot_profile_prop_density(lambda z, v: surface_duct(height_m=v, strength=expected_strength, z_grid_m=z, m_0=m_0),
-    #                          generator=lambda : np.random.normal(expected_height, 5))
-
-    plot_profile_prop_density(lambda z, v: evaporation_duct(height=v, z_grid_m=z, m_0=m_0),
-                              generator=lambda : np.random.normal(expected_height, 5),
-                              max_height_m=300
+    n = 1000
+    m_0 = 320
+    f, ax = plt.subplots(2, 4, figsize=(9, 6), constrained_layout=True)
+    duct = lambda z, v: evaporation_duct(height=v, z_grid_m=z, m_0=m_0)
+    plot_profile_prop_density(duct,
+                              generator=lambda : np.random.normal(10, 0.001),
+                              max_height_m=200, ax=ax[0, 0], m_bounds=[290, 390]
                               )
+    plot_profile_prop_density(duct,
+                              generator=lambda: np.random.normal(10, 1),
+                              max_height_m=200, ax=ax[0, 1], m_bounds=[290, 390]
+                              )
+    im = plot_profile_prop_density(duct,
+                              generator=lambda: np.random.normal(10, 5),
+                              max_height_m=200, ax=ax[0, 2], m_bounds=[290, 390]
+                              )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(10, 10),
+                                   max_height_m=200, ax=ax[0, 3], m_bounds=[290, 390]
+                                   )
+
+    plot_profile_prop_density(duct,
+                              generator=lambda: np.random.normal(20, 0.001),
+                              max_height_m=200, ax=ax[1, 0], m_bounds=[290, 390]
+                              )
+    plot_profile_prop_density(duct,
+                              generator=lambda: np.random.normal(20, 1),
+                              max_height_m=200, ax=ax[1, 1], m_bounds=[290, 390]
+                              )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(20, 5),
+                                   max_height_m=200, ax=ax[1, 2], m_bounds=[290, 390]
+                                   )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(20, 10),
+                                   max_height_m=200, ax=ax[1, 3], m_bounds=[290, 390]
+                                   )
+    ax[0, 0].set_ylabel("Высота, м")
+    ax[1, 0].set_ylabel("Высота, м")
+    ax[1, 0].set_xlabel("M профиль, M-ед.")
+    ax[1, 1].set_xlabel("M профиль, M-ед.")
+    ax[1, 2].set_xlabel("M профиль, M-ед.")
+    ax[1, 3].set_xlabel("M профиль, M-ед.")
+    f.colorbar(im, ax=ax[:], fraction=0.046*2/3, location='bottom')
+    plt.savefig('ducts.eps')
