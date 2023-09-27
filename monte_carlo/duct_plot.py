@@ -41,23 +41,31 @@ def plot_profile_prop_density(profile_func, generator, ax, max_height_m=300, m_b
 if __name__ == "__main__":
     n = 1000
     m_0 = 320
-    f, ax = plt.subplots(2, 4, figsize=(9, 6), constrained_layout=True)
+    f, ax = plt.subplots(2, 6, figsize=(9, 6), constrained_layout=True)
     duct = lambda z, v: evaporation_duct(height=v, z_grid_m=z, m_0=m_0)
     plot_profile_prop_density(duct,
                               generator=lambda : np.random.normal(10, 0.001),
                               max_height_m=200, ax=ax[0, 0], m_bounds=[290, 390]
                               )
     plot_profile_prop_density(duct,
-                              generator=lambda: np.random.normal(10, 1),
+                              generator=lambda: np.random.normal(10,0.5),
                               max_height_m=200, ax=ax[0, 1], m_bounds=[290, 390]
                               )
     im = plot_profile_prop_density(duct,
-                              generator=lambda: np.random.normal(10, 5),
+                              generator=lambda: np.random.normal(10, 1),
                               max_height_m=200, ax=ax[0, 2], m_bounds=[290, 390]
                               )
     im = plot_profile_prop_density(duct,
-                                   generator=lambda: np.random.normal(10, 10),
+                                   generator=lambda: np.random.normal(10, 2),
                                    max_height_m=200, ax=ax[0, 3], m_bounds=[290, 390]
+                                   )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(10, 3),
+                                   max_height_m=200, ax=ax[0, 4], m_bounds=[290, 390]
+                                   )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(10, 4),
+                                   max_height_m=200, ax=ax[0, 5], m_bounds=[290, 390]
                                    )
 
     plot_profile_prop_density(duct,
@@ -65,16 +73,24 @@ if __name__ == "__main__":
                               max_height_m=200, ax=ax[1, 0], m_bounds=[290, 390]
                               )
     plot_profile_prop_density(duct,
-                              generator=lambda: np.random.normal(20, 1),
+                              generator=lambda: np.random.normal(20, 0.5),
                               max_height_m=200, ax=ax[1, 1], m_bounds=[290, 390]
                               )
     im = plot_profile_prop_density(duct,
-                                   generator=lambda: np.random.normal(20, 5),
+                                   generator=lambda: np.random.normal(20, 1),
                                    max_height_m=200, ax=ax[1, 2], m_bounds=[290, 390]
                                    )
     im = plot_profile_prop_density(duct,
-                                   generator=lambda: np.random.normal(20, 10),
+                                   generator=lambda: np.random.normal(20, 2),
                                    max_height_m=200, ax=ax[1, 3], m_bounds=[290, 390]
+                                   )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(20, 3),
+                                   max_height_m=200, ax=ax[1, 4], m_bounds=[290, 390]
+                                   )
+    im = plot_profile_prop_density(duct,
+                                   generator=lambda: np.random.normal(20, 4),
+                                   max_height_m=200, ax=ax[1, 5], m_bounds=[290, 390]
                                    )
     ax[0, 0].set_ylabel("Высота, м")
     ax[1, 0].set_ylabel("Высота, м")
@@ -82,5 +98,21 @@ if __name__ == "__main__":
     ax[1, 1].set_xlabel("M профиль, M-ед.")
     ax[1, 2].set_xlabel("M профиль, M-ед.")
     ax[1, 3].set_xlabel("M профиль, M-ед.")
+    ax[1, 4].set_xlabel("M профиль, M-ед.")
+    ax[1, 5].set_xlabel("M профиль, M-ед.")
+
+    ax[0, 0].set_title("h=10, σ=0")
+    ax[0, 1].set_title("h=10, σ=0.5")
+    ax[0, 2].set_title("h=10, σ=1")
+    ax[0, 3].set_title("h=10, σ=2")
+    ax[0, 4].set_title("h=10, σ=3")
+    ax[0, 5].set_title("h=10, σ=4")
+    ax[1, 0].set_title("h=20, σ=0")
+    ax[1, 1].set_title("h=20, σ=0.5")
+    ax[1, 2].set_title("h=20, σ=1")
+    ax[1, 3].set_title("h=20, σ=2")
+    ax[1, 4].set_title("h=20, σ=3")
+    ax[1, 5].set_title("h=20, σ=4")
+
     f.colorbar(im, ax=ax[:], fraction=0.046*2/3, location='bottom')
     plt.savefig('ducts.eps')
