@@ -4,6 +4,9 @@ from rwp.environment import Troposphere, \
     Terrain, gauss_hill_func
 
 
+logging.basicConfig(level=logging.DEBUG)
+
+
 environment = Troposphere()
 environment.terrain = Terrain(
     elevation=gauss_hill_func(
