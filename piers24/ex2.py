@@ -7,43 +7,36 @@ from rwp.environment import Troposphere, \
 logging.basicConfig(level=logging.DEBUG)
 
 
-environment = Troposphere()
+environment = Troposphere(flat=False)
 environment.terrain = Terrain(
-    elevation=gauss_hill_func(
-        height_m=750,
-        length_m=40E3,
-        x0_m=50E3
-    ),
-    ground_material=WetGround()
+    ground_material=SaltWater()
 )
-
-# environment.vegetation = [Impediment(
-#     left_m=00E3,
-#     right_m=100E3,
-#     height_m=25,
-#     material=CustomMaterial(eps=1.004, sigma=180e-6)
-# )]
-
+elevated_duct = interp1d(
+    x=[0, 100, 150, 300],
+    y=[0, 32, 10, 45],
+    fill_value="extrapolate")
+environment.M_profile = lambda x, z: \
+    elevated_duct(z)
 
 params = RWPSSpadeComputationalParams(
-    max_range_m=100E3,
-    max_height_m=1000,
+    max_range_m=200E3,
+    max_height_m=600,
     dx_m = 100,  # output grid steps affects only on the resulting field, NOT the computational grid
     dz_m = 1
 )
 
 
-antenna = GaussAntenna(freq_hz=900E6,
-                       height=50,
-                       beam_width=0.5,
-                       elevation_angle=-0.7,
+antenna = GaussAntenna(freq_hz=2400E6,
+                       height=500,
+                       beam_width=0.1,
+                       elevation_angle=0.7,
                        polarz='V')
 
 field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
 
 vis3ghz = FieldVisualiser(field, env=environment, x_mult=1E-3)
 
-plt = vis3ghz.plot2d(min=-90, max=10, show_terrain=True)
+plt = vis3ghz.plot2d(min=-50, max=10, show_terrain=True)
 plt.xlabel('Range (km)')
 plt.ylabel('Height (m)')
 plt.tight_layout()
