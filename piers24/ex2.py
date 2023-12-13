@@ -20,17 +20,17 @@ environment.M_profile = lambda x, z: \
 
 params = RWPSSpadeComputationalParams(
     max_range_m=200E3,
-    max_height_m=600,
+    max_height_m=2000,
     dx_m = 100,  # output grid steps affects only on the resulting field, NOT the computational grid
     dz_m = 1
 )
 
 
 antenna = GaussAntenna(freq_hz=2400E6,
-                       height=500,
-                       beam_width=0.1,
-                       elevation_angle=0.7,
-                       polarz='V')
+                       height=1500,
+                       beam_width=0.5,
+                       elevation_angle=1.2,
+                       polarz='H')
 
 field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
 
