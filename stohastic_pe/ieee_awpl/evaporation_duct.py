@@ -40,9 +40,9 @@ def do_model(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height
         environment.M_profile = lambda x, z: evaporation_duct(height=height, z_grid_m=z) * (z < 95) + \
                                              evaporation_duct(height=height, z_grid_m=95) * (z >= 95)
         field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
-        expected_field.field = (expected_field.field*h_i + 10*np.log10(np.abs(field.field+1e-16))) / (h_i+1)
+        expected_field.field = (expected_field.field*h_i + 20*np.log10(np.abs(field.field+1e-16))) / (h_i+1)
         norm = np.linalg.norm(expected_field.field)
-        print(f'{round(h_i/n, 1)} {round(height, 3)} {10*fm.log10(abs(norm-prev_norm)/norm)}')
+        print(f'{round(h_i/n, 1)} {round(height, 3)} {20*fm.log10(abs(norm-prev_norm)/norm)}')
         prev_norm = norm
 
     for h_i, height in enumerate(heights):
@@ -50,12 +50,12 @@ def do_model(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height
                                              evaporation_duct(height=height, z_grid_m=95) * (z >= 95)
         field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
         print(f'{round(h_i/n, 1)} {round(height, 3)}')
-        error.field += (10*np.log10(np.abs(field.field+1e-16)) - expected_field.field)**2
+        error.field += (20*np.log10(np.abs(field.field+1e-16)) - expected_field.field)**2
 
-    expected_error.field = 10*np.log10(np.abs(mid_field.field+1e-16)) - expected_field.field
+    expected_error.field = 20*np.log10(np.abs(mid_field.field+1e-16)) - expected_field.field
     error.field = np.sqrt(error.field/n)
 
-    vis = FieldVisualiser(mid_field, env=environment, trans_func=lambda v: 10 * cm.log10(1e-16 + abs(v)), label='Pade + Transparent BC', x_mult=1E-3)
+    vis = FieldVisualiser(mid_field, env=environment, trans_func=lambda v: 20 * cm.log10(1e-16 + abs(v)), label='Pade + Transparent BC', x_mult=1E-3)
     expected_vis = FieldVisualiser(expected_field, env=environment, trans_func=lambda v: v,
                                    label='Pade + Transparent BC', x_mult=1E-3)
 
@@ -68,7 +68,7 @@ def show(vis, expected_vis, vis_expected_error, vis_error):
     plt.rcParams['font.size'] = '13'
     f, ax = plt.subplots(1, 4, figsize=(9, 2.5), constrained_layout=True)
     # ax = [a[0, 0], a[0, 1], a[1, 0], a[1, 1]]
-    norm = Normalize(-40, 0)
+    norm = Normalize(-80, 0)
     extent = [vis.x_grid[0], vis.x_grid[-1], vis.z_grid[0], vis.z_grid[-1]]
     im = ax[0].imshow(vis.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('jet'))
     f.colorbar(im, ax=ax[0], fraction=0.046, location='bottom')
@@ -77,7 +77,7 @@ def show(vis, expected_vis, vis_expected_error, vis_error):
     ax[0].set_title("L, dB", fontsize=13)
     ax[0].grid(True)
 
-    norm = Normalize(-40, 0)
+    norm = Normalize(-80, 0)
     extent = [expected_vis.x_grid[0], expected_vis.x_grid[-1], expected_vis.z_grid[0], expected_vis.z_grid[-1]]
     im = ax[1].imshow(expected_vis.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('jet'))
     f.colorbar(im, ax=ax[1], fraction=0.046, location='bottom')
@@ -86,7 +86,7 @@ def show(vis, expected_vis, vis_expected_error, vis_error):
     ax[1].set_yticklabels([])
     ax[1].grid(True)
 
-    norm = Normalize(-10, 10)
+    norm = Normalize(-20, 20)
     extent = [vis_error.x_grid[0], vis_error.x_grid[-1], vis_error.z_grid[0], vis_error.z_grid[-1]]
     im = ax[2].imshow(vis_expected_error.field.T[::-1, :], extent=extent, norm=norm, aspect='auto',
                       cmap=plt.get_cmap('seismic'))
@@ -97,7 +97,7 @@ def show(vis, expected_vis, vis_expected_error, vis_error):
     ax[2].set_title("L - E[L]")
     ax[2].grid(True)
 
-    norm = Normalize(0, 10)
+    norm = Normalize(0, 20)
     extent = [vis_error.x_grid[0], vis_error.x_grid[-1], vis_error.z_grid[0], vis_error.z_grid[-1]]
     im = ax[3].imshow(vis_error.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('binary'))
     f.colorbar(im, ax=ax[3], fraction=0.046, location='bottom')
