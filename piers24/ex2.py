@@ -15,8 +15,8 @@ elevated_duct = interp1d(
     x=[0, 100, 150, 300],
     y=[0, 32, 10, 45],
     fill_value="extrapolate")
-environment.M_profile = lambda x, z: \
-    elevated_duct(z)
+#environment.M_profile = lambda x, z: elevated_duct(z)
+environment.M_profile = lambda x, z: evaporation_duct(height=20, z_grid_m=z)
 
 params = RWPSSpadeComputationalParams(
     max_range_m=200E3,
@@ -27,9 +27,9 @@ params = RWPSSpadeComputationalParams(
 
 
 antenna = GaussAntenna(freq_hz=2400E6,
-                       height=1500,
-                       beam_width=0.5,
-                       elevation_angle=1.2,
+                       height=20,
+                       beam_width=5,
+                       elevation_angle=0,
                        polarz='H')
 
 field = rwp_ss_pade(antenna=antenna, env=environment, params=params)
