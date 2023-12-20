@@ -1,7 +1,12 @@
+from copy import deepcopy
+
+import numpy as np
+
 from rwp.antennas import GaussAntenna
 from rwp.environment import Troposphere, Impediment
 from rwp.field import Field
 from rwp.sspade import RWPSSpadeComputationalParams, rwp_ss_pade
+from rwp.vis import FieldVisualiser
 
 
 def solution(
@@ -40,8 +45,9 @@ def solution(
     )
 
     inv_env = Troposphere(flat=env.is_flat)
-    inv_env.M_profile = lambda x, z: env.M_profile(params.max_range_m - x, z)
-    inv_env.terrain = lambda x: env.terrain(params.max_range_m - x)
+    inv_env.M_profile = (lambda x, z: env.M_profile(params.max_range_m - x, z)) if env.M_profile else None
+    inv_env.terrain.elevation = lambda x: env.terrain.elevation(params.max_range_m - x)
+    inv_env.terrain.ground_material = lambda x: env.terrain.ground_material(params.max_range_m - x)
     inv_env.vegetation = [Impediment(
         left_m=params.max_range_m - imp.right_m,
         right_m=params.max_range_m - imp.left_m,
@@ -50,6 +56,20 @@ def solution(
         for imp in env.vegetation]
 
     field_src = rwp_ss_pade(antenna=antenna_src, env=env, params=params)
+    field_src.field = 10 * np.log10(np.abs(field_src.field))
+    field_src.log10 = True
+    field_src.normalize()
     field_dst = rwp_ss_pade(antenna=antenna_dst, env=inv_env, params=params)
+    field_dst.field = 10 * np.log10(np.abs(field_dst.field))
+    field_dst.log10 = True
+    field_dst.normalize()
 
-    return field_src, field_dst
+    src_loss = deepcopy(field_src)
+    src_loss.field += src_1m_power_db
+    dst_loss = deepcopy(field_dst)
+    dst_loss.field += dst_1m_power_db
+
+    src_vis = FieldVisualiser(field_src, env=env, x_mult=1E-3)
+    dst_vis = FieldVisualiser(field_dst, env=inv_env, x_mult=1E-3)
+
+    return src_vis, dst_vis
