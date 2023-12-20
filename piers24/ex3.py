@@ -19,7 +19,7 @@ environment.terrain = Terrain(
 )
 
 
-src_vis, dst_vis = solution(
+src_vis, dst_vis, src_bw_vis = solution(
     freq_hz=2400e6,
     polarz="H",
     src_height_m=20,
@@ -36,7 +36,7 @@ src_vis, dst_vis = solution(
     env=environment
 )
 
-plt = src_vis.plot2d(min=10, max=50, show_terrain=True)
+plt = src_vis.plot2d(min=-50, max=0, show_terrain=True)
 plt.xlabel('Range (km)')
 plt.ylabel('Height (m)')
 plt.tight_layout()
@@ -44,7 +44,15 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-plt = dst_vis.plot2d(min=10, max=50, show_terrain=True)
+plt = dst_vis.plot2d(min=-50, max=0, show_terrain=True)
+plt.xlabel('Range (km)')
+plt.ylabel('Height (m)')
+plt.tight_layout()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+plt = src_bw_vis.plot2d(min=0.5, max=0.51, show_terrain=True)
 plt.xlabel('Range (km)')
 plt.ylabel('Height (m)')
 plt.tight_layout()
