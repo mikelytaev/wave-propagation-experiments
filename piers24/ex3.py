@@ -6,16 +6,16 @@ from utils import solution, get_elevation_func
 
 logging.basicConfig(level=logging.DEBUG)
 
-
+elevation_func = get_elevation_func(21.426706, -158.165515, 21.837204, -157.806865, 5000)
 environment = Troposphere()
 environment.terrain = Terrain(
-    elevation=get_elevation_func(-33.97242552291476, 18.355074679608087, -33.97736899254513, 18.558882296380858, 1000),
+    elevation=lambda x: elevation_func(x + 2500),
     #ground_material=WetGround()
 )
 
 logging.basicConfig(level=logging.DEBUG)
 src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis = solution(
-    freq_hz=2400e6,
+    freq_hz=900e6,
     polarz="H",
     src_height_m=20,
     src_1m_power_db=50,
@@ -23,8 +23,8 @@ src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis = solution(
     drone_max_height_m=2000,
     drone_max_range_m=100e3,
     dst_height_m=20,
-    dst_range_m=20e3,
-    dst_1m_power_db=40,
+    dst_range_m=35e3,
+    dst_1m_power_db=50,
     src_min_power_db=10,
     drone_min_power_db=10,
     dst_min_power_db=10,

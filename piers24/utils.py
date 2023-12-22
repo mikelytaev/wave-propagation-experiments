@@ -15,6 +15,8 @@ from podpac.datalib.terraintiles import TerrainTiles
 from podpac import Coordinates
 from podpac import settings
 
+import importlib
+
 
 def solution(
         freq_hz: float,
@@ -35,21 +37,21 @@ def solution(
     logging.basicConfig(level=logging.DEBUG)
     antenna_src = GaussAntenna(freq_hz=freq_hz,
                            height=src_height_m,
-                           beam_width=30,
+                           beam_width=60,
                            elevation_angle=0,
                            polarz=polarz)
 
     antenna_dst = GaussAntenna(freq_hz=freq_hz,
                            height=dst_height_m,
-                           beam_width=30,
+                           beam_width=60,
                            elevation_angle=0,
                            polarz=polarz)
 
     params = RWPSSpadeComputationalParams(
         max_range_m=dst_range_m,
         max_height_m=drone_max_height_m,
-        dx_m=100,  # output grid steps affects only on the resulting field, NOT the computational grid
-        dz_m=1,
+        dx_m=25,  # output grid steps affects only on the resulting field, NOT the computational grid
+        dz_m=0.5,
         dx_computational_grid_wl=25,
         dz_computational_grid_wl=0.5,
         z_order=SSPadeZOrder.joined
@@ -110,5 +112,8 @@ def get_elevation_func(lat1: float, long1: float, lat2: float, long2: float, n_p
     eval = np.array([o.data[i, i] for i in range(0, len(x_grid))])
     eval[np.isnan(eval)] = 0
     eval = np.array([max(a, 0) for a in eval])
+
+    #podpac делает какую-то дичь с логгером
+    importlib.reload(logging)
 
     return interp1d(x=x_grid, y=eval, fill_value="extrapolate")
