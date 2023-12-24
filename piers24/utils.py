@@ -37,13 +37,13 @@ def solution(
     logging.basicConfig(level=logging.DEBUG)
     antenna_src = GaussAntenna(freq_hz=freq_hz,
                            height=src_height_m,
-                           beam_width=60,
+                           beam_width=30,
                            elevation_angle=0,
                            polarz=polarz)
 
     antenna_dst = GaussAntenna(freq_hz=freq_hz,
                            height=dst_height_m,
-                           beam_width=60,
+                           beam_width=30,
                            elevation_angle=0,
                            polarz=polarz)
 
@@ -52,8 +52,9 @@ def solution(
         max_height_m=drone_max_height_m,
         dx_m=25,  # output grid steps affects only on the resulting field, NOT the computational grid
         dz_m=0.5,
-        dx_computational_grid_wl=25,
-        dz_computational_grid_wl=0.5,
+        #dx_computational_grid_wl=25,
+        #dz_computational_grid_wl=0.5,
+        max_propagation_angle_deg=30,
         z_order=SSPadeZOrder.joined
     )
 
@@ -64,8 +65,8 @@ def solution(
         ground_material=lambda x: env.terrain.ground_material(params.max_range_m - x)
     )
     inv_env.vegetation = [Impediment(
-        left_m=params.max_range_m - imp.right_m,
-        right_m=params.max_range_m - imp.left_m,
+        left_m=params.max_range_m - imp.x2,
+        right_m=params.max_range_m - imp.x1,
         height_m=imp.height,
         material=imp.material)
         for imp in env.vegetation]
@@ -75,9 +76,10 @@ def solution(
     field_src.log10 = True
     field_src.normalize()
     field_dst = rwp_ss_pade(antenna=antenna_dst, env=inv_env, params=params)
-    field_dst.field = 10 * np.log10(np.abs(field_dst.field[::-1, :])+1e-16)
+    field_dst.field = 10 * np.log10(np.abs(field_dst.field)+1e-16)
     field_dst.log10 = True
     field_dst.normalize()
+    field_dst.field = field_dst.field[::-1, :]
 
     src_bw = deepcopy(field_src)
     src_bw.field = np.logical_and(src_1m_power_db + field_src.field > drone_min_power_db, drone_1m_power_db + field_src.field > src_min_power_db)
