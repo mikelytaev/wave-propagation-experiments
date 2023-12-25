@@ -82,25 +82,36 @@ def solution(
     field_dst.field = field_dst.field[::-1, :]
 
     src_bw = deepcopy(field_src)
-    src_bw.field = np.logical_and(src_1m_power_db + field_src.field > drone_min_power_db, drone_1m_power_db + field_src.field > src_min_power_db)
+    src_bw.field = np.logical_and(
+        src_1m_power_db + field_src.field > drone_min_power_db,
+        drone_1m_power_db + field_src.field > src_min_power_db)
     src_bw.log10 = False
 
     dst_bw = deepcopy(field_dst)
-    dst_bw.field = np.logical_and(dst_1m_power_db + field_dst.field > drone_min_power_db,
-                                  drone_1m_power_db + field_dst.field > dst_min_power_db)
+    dst_bw.field = np.logical_and(
+        dst_1m_power_db + field_dst.field > drone_min_power_db,
+        drone_1m_power_db + field_dst.field > dst_min_power_db)
     dst_bw.log10 = False
 
     merge = deepcopy(src_bw)
     merge.field = np.logical_and(src_bw.field, dst_bw.field)
     merge.log10 = False
 
+    opt = deepcopy(field_src)
+    opt.field = np.minimum(np.minimum(np.minimum(
+        src_1m_power_db + field_src.field - drone_min_power_db,
+        drone_1m_power_db + field_src.field - src_min_power_db),
+        dst_1m_power_db + field_dst.field - drone_min_power_db),
+        drone_1m_power_db + field_dst.field - dst_min_power_db)
+
     src_vis = FieldVisualiser(field_src, env=env, trans_func=lambda v: v, x_mult=1E-3)
     dst_vis = FieldVisualiser(field_dst, env=env, trans_func=lambda v: v, x_mult=1E-3)
     src_bw_vis = FieldVisualiser(src_bw, env=env, trans_func=lambda v: v, x_mult=1E-3, bw=True)
     dst_bw_vis = FieldVisualiser(dst_bw, env=env, trans_func=lambda v: v, x_mult=1E-3, bw=True)
     merge_vis = FieldVisualiser(merge, env=env, trans_func=lambda v: v, x_mult=1E-3, bw=True)
+    opt_vis = FieldVisualiser(opt, env=env, trans_func=lambda v: v, x_mult=1E-3, bw=True)
 
-    return src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis
+    return src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis, opt_vis
 
 
 def get_elevation_func(lat1: float, long1: float, lat2: float, long2: float, n_points: int):

@@ -1,5 +1,6 @@
 import logging
 
+from matplotlib.colors import Normalize
 from scipy.interpolate import interp1d
 
 from rwp.environment import Troposphere, Terrain, gauss_hill_func, WetGround, Impediment, CustomMaterial
@@ -27,7 +28,7 @@ environment.terrain = Terrain(
 # environment.M_profile = lambda x, z: surface_based_duct(z)
 
 logging.basicConfig(level=logging.DEBUG)
-src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis = solution(
+src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis, opt_vis = solution(
     freq_hz=900e6,
     polarz="H",
     src_height_m=30,
@@ -82,4 +83,39 @@ plt.ylabel('Height (m)')
 plt.tight_layout()
 plt.grid(True)
 plt.tight_layout()
+plt.show()
+
+plt = opt_vis.plot2d(min=0, max=25, show_terrain=True, cmap='gnuplot')
+plt.xlabel('Range (km)')
+plt.ylabel('Height (m)')
+plt.tight_layout()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+
+plt.rcParams['font.size'] = '10'
+f, ax = plt.subplots(1, 2, figsize=(6.5, 3.2), constrained_layout=True)
+norm = Normalize(-50, 0)
+extent = [src_vis.x_grid[0], src_vis.x_grid[-1], src_vis.z_grid[0], src_vis.z_grid[-1]]
+im = ax[0].imshow(src_vis.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('jet'))
+f.colorbar(im, ax=ax[:], fraction=0.046, location='bottom')
+ax[0].set_xlabel("Range (km)", fontsize=10)
+ax[0].set_ylabel("Height (m)", fontsize=10)
+#ax[0].set_title("L, dB", fontsize=13)
+ax[0].grid(True)
+
+norm = Normalize(-80, 0)
+extent = [dst_vis.x_grid[0], dst_vis.x_grid[-1], dst_vis.z_grid[0], dst_vis.z_grid[-1]]
+im = ax[1].imshow(dst_vis.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('jet'))
+#f.colorbar(im, ax=ax[1], fraction=0.046, location='bottom')
+ax[1].set_xlabel("Range (km)", fontsize=10)
+#ax[1].set_title("E[L], dB", fontsize=10)
+ax[1].set_yticklabels([])
+ax[1].grid(True)
+#f.tight_layout()
+for a in ax[:]:
+    for label in (a.get_xticklabels() + a.get_yticklabels()):
+        label.set_fontsize(10)
 plt.show()
