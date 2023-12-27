@@ -10,43 +10,39 @@ import numpy as np
 
 logging.basicConfig(level=logging.DEBUG)
 
-elevation_func = get_elevation_func(21.426706, -158.165515, 21.837204, -157.806865, 5000)
 environment = Troposphere()
-environment.terrain = Terrain(
-    elevation=lambda x: elevation_func(x + 1500)*0.75,
-    #ground_material=WetGround()
-)
-# environment.vegetation = [Impediment(
-#     left_m=2.5E3,
-#     right_m=32.5E3,
-#     height_m=25,
-#     material=CustomMaterial(eps=1.004, sigma=180e-6)
-# )]
 # surface_based_duct = interp1d(
 #     x=[0, 900, 1200, 1500],
 #     y=[5, 40, 0, 15],
 #     fill_value="extrapolate")
 # environment.M_profile = lambda x, z: surface_based_duct(z)
 
+elevated_duct = interp1d(
+    x=[0, 100, 150, 300],
+    y=[0, 32, 10, 45],
+    fill_value="extrapolate")
+environment.M_profile = lambda x, z: elevated_duct(z)
+
 logging.basicConfig(level=logging.DEBUG)
 src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis, opt_vis = solution(
-    freq_hz=900e6,
+    freq_hz=3000e6,
     polarz="H",
-    src_height_m=30,
+    src_height_m=15,
     src_1m_power_db=50,
     drone_1m_power_db=50,
-    drone_max_height_m=1500,
+    drone_max_height_m=500,
     drone_max_range_m=100e3,
-    dst_height_m=25,
-    dst_range_m=36e3,
+    dst_height_m=5,
+    dst_range_m=150e3,
     dst_1m_power_db=50,
     src_min_power_db=10,
     drone_min_power_db=10,
     dst_min_power_db=10,
-    env=environment
+    env=environment,
+    beam_width=2
 )
 
-plt = src_vis.plot2d(min=0, max=100, show_terrain=True, cmap="jet_r")
+plt = src_vis.plot2d(min=-50, max=0, show_terrain=True)
 plt.xlabel('Range (km)')
 plt.ylabel('Height (m)')
 plt.tight_layout()
@@ -54,7 +50,7 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-plt = dst_vis.plot2d(min=0, max=100, show_terrain=True, cmap="jet_r")
+plt = dst_vis.plot2d(min=-50, max=0, show_terrain=True)
 plt.xlabel('Range (km)')
 plt.ylabel('Height (m)')
 plt.tight_layout()
@@ -124,7 +120,7 @@ ax[1].grid(True)
 for a in ax[:]:
     for label in (a.get_xticklabels() + a.get_yticklabels()):
         label.set_fontsize(10)
-plt.savefig('ex1.1.eps')
+plt.savefig('ex2.1.eps')
 
 #################################################
 
@@ -154,7 +150,7 @@ ax[1].grid(True)
 for a in ax[:]:
     for label in (a.get_xticklabels() + a.get_yticklabels()):
         label.set_fontsize(10)
-plt.savefig('ex1.2.eps')
+plt.savefig('ex2.2.eps')
 
 #################################################
 
@@ -186,4 +182,4 @@ ax[1].grid(True)
 for a in ax[:]:
     for label in (a.get_xticklabels() + a.get_yticklabels()):
         label.set_fontsize(10)
-plt.savefig('ex1.3.eps')
+plt.savefig('ex2.3.eps')
