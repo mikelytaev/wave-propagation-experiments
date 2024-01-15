@@ -53,7 +53,7 @@ def show(random_field: RandomField, mean_index_field: Field):
         for label in (a.get_xticklabels() + a.get_yticklabels()):
             label.set_fontsize(13)
 
-def calc(M_profile, range_m, height_m, freq_hz, ant_height, file_name):
+def calc(M_profile, range_m, height_m, freq_hz, ant_height, file_name, max_monte_carlo_iterations=100):
     environment = Troposphere()
     environment.terrain = Terrain(ground_material=SaltWater())
 
@@ -72,7 +72,7 @@ def calc(M_profile, range_m, height_m, freq_hz, ant_height, file_name):
         max_height_m=height_m,
         dx_m = 100, # output grid steps affects only on the resulting field, NOT the computational grid
         dz_m = 1,
-        max_monte_carlo_iterations=100
+        max_monte_carlo_iterations=max_monte_carlo_iterations
     )
 
 
