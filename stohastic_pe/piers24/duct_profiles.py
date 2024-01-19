@@ -53,18 +53,23 @@ sd3 = RandomSurfaceDuct(
         slope=norm(loc=0.15, scale=0.005)
     )
 
+plt.rcParams['font.size'] = '8'
 f, ax = plt.subplots(1, 3, figsize=(4, 2.5), constrained_layout=True)
 plot_profile_prop_density(sd1, ax[0])
 plot_profile_prop_density(sd2, ax[1])
 im = plot_profile_prop_density(sd3, ax[2])
 
-ax[0].set_ylabel("Height (m)")
-ax[0].set_title("σ=1 M-unit")
-ax[1].set_title("σ=2 M-units")
-ax[2].set_title("σ=5 M-units")
-ax[0].set_xlabel("M-profile")
-ax[1].set_xlabel("M-profile")
-ax[2].set_xlabel("M-profile")
+ax[0].set_ylabel("Height (m)", fontsize=8)
+ax[0].set_title("σ=1 M-unit", fontsize=8)
+ax[1].set_title("σ=2 M-units", fontsize=8)
+ax[2].set_title("σ=5 M-units", fontsize=8)
+ax[0].set_xlabel("M-profile", fontsize=8)
+ax[1].set_xlabel("M-profile", fontsize=8)
+ax[2].set_xlabel("M-profile", fontsize=8)
+
+for a in ax[:]:
+    for label in (a.get_xticklabels() + a.get_yticklabels()):
+        label.set_fontsize(8)
 
 f.colorbar(im, ax=ax[:], fraction=0.046*2/3, location='bottom')
 plt.savefig("surface_duct_profile.eps")
@@ -88,15 +93,20 @@ ed = M_profile=RandomTrilinearDuct(
     )
 
 
+plt.rcParams['font.size'] = '8'
 f, ax = plt.subplots(1, 2, figsize=(3, 2.5), constrained_layout=True)
 plot_profile_prop_density(sbd, ax[0])
 im = plot_profile_prop_density(ed, ax[1])
 
-ax[0].set_ylabel("Height (m)")
-ax[0].set_title("σ=3 M-units")
-ax[1].set_title("σ=3 M-units")
-ax[0].set_xlabel("M-profile")
-ax[1].set_xlabel("M-profile")
+ax[0].set_ylabel("Height (m)", fontsize=8)
+ax[0].set_title("σ=3 M-units", fontsize=8)
+ax[1].set_title("σ=3 M-units", fontsize=8)
+ax[0].set_xlabel("M-profile", fontsize=8)
+ax[1].set_xlabel("M-profile", fontsize=8)
+
+for a in ax[:]:
+    for label in (a.get_xticklabels() + a.get_yticklabels()):
+        label.set_fontsize(8)
 
 f.colorbar(im, ax=ax[:], fraction=0.046*2/3, location='bottom')
 plt.savefig("triliear_duct_profile.eps")
