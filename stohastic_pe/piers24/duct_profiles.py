@@ -59,9 +59,9 @@ plot_profile_prop_density(sd2, ax[1])
 im = plot_profile_prop_density(sd3, ax[2])
 
 ax[0].set_ylabel("Height (m)")
-ax[0].set_title("σ=1")
-ax[1].set_title("σ=2")
-ax[2].set_title("σ=5")
+ax[0].set_title("σ=1 M-unit")
+ax[1].set_title("σ=2 M-units")
+ax[2].set_title("σ=5 M-units")
 ax[0].set_xlabel("M-profile")
 ax[1].set_xlabel("M-profile")
 ax[2].set_xlabel("M-profile")
@@ -70,15 +70,15 @@ f.colorbar(im, ax=ax[:], fraction=0.046*2/3, location='bottom')
 plt.savefig("surface_duct_profile.eps")
 
 sbd = RandomTrilinearDuct(
-        z1=norm(loc=50, scale=3),
-        z2=norm(loc=150, scale=3),
+        z1=norm(loc=100, scale=3),
+        z2=norm(loc=200, scale=3),
         m0=norm(loc=300, scale=3),
-        m1=norm(loc=330, scale=3),
-        m2=norm(loc=310, scale=3),
+        m1=norm(loc=320, scale=3),
+        m2=norm(loc=280, scale=3),
         slope=norm(loc=0.15, scale=0.005)
     )
 
-ed = RandomTrilinearDuct(
+ed = M_profile=RandomTrilinearDuct(
         z1=norm(loc=50, scale=3),
         z2=norm(loc=150, scale=3),
         m0=norm(loc=300, scale=3),
@@ -93,8 +93,8 @@ plot_profile_prop_density(sbd, ax[0])
 im = plot_profile_prop_density(ed, ax[1])
 
 ax[0].set_ylabel("Height (m)")
-ax[0].set_title("σ=3")
-ax[1].set_title("σ=3")
+ax[0].set_title("σ=3 M-units")
+ax[1].set_title("σ=3 M-units")
 ax[0].set_xlabel("M-profile")
 ax[1].set_xlabel("M-profile")
 
