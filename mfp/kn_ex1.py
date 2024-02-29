@@ -1,4 +1,7 @@
 import os
+
+import numpy as np
+
 os.chdir('../../')
 from rwp.kediffraction import *
 from rwp.antennas import *
@@ -9,12 +12,13 @@ logging.basicConfig(level=logging.DEBUG)
 env = Troposphere(flat=True)
 env.z_max = 150
 env.knife_edges = [
-    KnifeEdge(range=200, height=70),
+    KnifeEdge(range=-200, height=70),
+    KnifeEdge(range=1300, height=70),
 ]
 antenna = Source(wavelength=1, height_m=50)
 #antenna = GaussAntenna(freq_hz=300e6, height=100, beam_width=15, elevation_angle=0, polarz='H')
 
-kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=env, min_range_m=-1000, max_range_m=1000, max_propagation_angle=90)
+kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=env, min_range_m=-500, max_range_m=1500, max_propagation_angle=90)
 field = kdc.calculate()
 
 vis = FieldVisualiser(field, env=env, trans_func=lambda v: 10 * cm.log10(1e-16 + abs(v)), label='ke')
@@ -22,12 +26,6 @@ plt = vis.plot2d(min=-40, max=10)
 plt.title('The intensity of the field component 10log10|u|')
 plt.xlabel('Range (m)')
 plt.ylabel('Height (m)')
-plt.show()
-
-plt = vis.plot_hor(51)
-plt.title('The intensity of the field component 10log10|u| at the height 51 m')
-plt.xlabel('Range (m)')
-plt.ylabel('10log|u| (dB)')
 plt.show()
 
 
@@ -67,12 +65,19 @@ def mv_mvp(measures: List[Measure], fields: List[Field]) -> Field:
     k = np.matmul(d.reshape(len(d), 1), d.reshape(1, len(d)).conj())
     k_inv = np.linalg.inv(k)
 
+    normalizer = deepcopy(fields[0])
+    normalizer.field *= 0
+    for ind in range(0, len(fields)):
+        normalizer.field += abs(fields[ind].field) ** 2
+
+    normalizer.field = np.sqrt(normalizer.field)
+
     for ind_i in range(0, res.field.shape[0]):
         for ind_j in range(0, res.field.shape[1]):
-            w = np.array([f.field[ind_i, ind_j] for f in fields])
+            w = np.array([f.field[ind_i, ind_j] for f in fields]) / normalizer.field[ind_i, ind_j]
             w = w.reshape(len(w), 1)
             t = np.matmul(np.matmul(w.reshape(1, len(w)).conj(), k_inv), w)
-            res.field[ind_i, ind_j] = 1 / t
+            res.field[ind_i, ind_j] = (1 / t) / (1 / np.matmul(w.reshape(1, len(w)).conj(), w))
 
     return res
 
@@ -113,15 +118,15 @@ plt.show()
 
 bartlett_mfp_field = bartlett_mvp(measures=measures, fields=fields)
 vis = FieldVisualiser(bartlett_mfp_field, env=env, trans_func=lambda v: 10 * cm.log10(1e-16 + abs(v)), label='ke')
-plt = vis.plot2d(min=vis.max-1, max=vis.max)
+plt = vis.plot2d(min=vis.max-5, max=vis.max)
 plt.title('The intensity of the field component 10log10|u|')
 plt.xlabel('Range (m)')
 plt.ylabel('Height (m)')
 plt.show()
 
 mv_mfp_field = mv_mvp(measures=measures, fields=fields)
-vis = FieldVisualiser(mv_mfp_field, env=env, trans_func=lambda v: 10 * cm.log10(1e-16 + abs(v)), label='ke')
-plt = vis.plot2d(min=-200, max=0)
+vis = FieldVisualiser(mv_mfp_field, env=env, trans_func=lambda v: 10 * cm.log10(1e-66 + abs(v)), label='ke')
+plt = vis.plot2d(min=vis.max-10, max=vis.max)
 plt.title('The intensity of the field component 10log10|u|')
 plt.xlabel('Range (m)')
 plt.ylabel('Height (m)')
