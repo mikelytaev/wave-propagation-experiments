@@ -45,41 +45,49 @@ class SearchArea:
     max_x_m: float = None
 
 
-def bartlett_mvp(measures: List[Measure], fields: List[Field]) -> Field:
+def bartlett_mfp(measures: List[Measure], fields: List[np.ndarray]) -> np.ndarray:
     res = deepcopy(fields[0])
-    res.field *= 0
+    res *= 0
     normalizer = deepcopy(fields[0])
-    normalizer.field *= 0
+    normalizer *= 0
     for ind in range(0, len(fields)):
-        res.field += measures[ind].value.conjugate() * fields[ind].field
-        normalizer.field += abs(fields[ind].field) ** 2
+        res += measures[ind].value.conjugate() * fields[ind]
+        normalizer += abs(fields[ind]) ** 2
 
-    res.field = res.field**2 / normalizer.field
+    res = res**2 / normalizer
     return res
 
 
-def mv_mvp(measures: List[Measure], fields: List[Field]) -> Field:
+def mv_mfp(measures: List[Measure], fields: List[np.ndarray]) -> np.ndarray:
     res = deepcopy(fields[0])
-    res.field *= 0
+    res *= 0
     d = np.array([m.value for m in measures], dtype=complex)
     k = np.matmul(d.reshape(len(d), 1), d.reshape(1, len(d)).conj())
     k_inv = np.linalg.inv(k)
 
     normalizer = deepcopy(fields[0])
-    normalizer.field *= 0
+    normalizer *= 0
     for ind in range(0, len(fields)):
-        normalizer.field += abs(fields[ind].field) ** 2
+        normalizer += abs(fields[ind]) ** 2
 
-    normalizer.field = np.sqrt(normalizer.field)
+    normalizer = np.sqrt(normalizer)
 
-    for ind_i in range(0, res.field.shape[0]):
-        for ind_j in range(0, res.field.shape[1]):
-            w = np.array([f.field[ind_i, ind_j] for f in fields]) / normalizer.field[ind_i, ind_j]
+    for ind_i in range(0, res.shape[0]):
+        for ind_j in range(0, res.shape[1]):
+            w = np.array([f[ind_i, ind_j] for f in fields]) / normalizer[ind_i, ind_j]
             w = w.reshape(len(w), 1)
             t = np.matmul(np.matmul(w.reshape(1, len(w)).conj(), k_inv), w)
-            res.field[ind_i, ind_j] = (1 / t) / (1 / np.matmul(w.reshape(1, len(w)).conj(), w))
+            res[ind_i, ind_j] = (1 / t) / (1 / np.matmul(w.reshape(1, len(w)).conj(), w))
 
     return res
+
+
+def rwp_mfp(measures: List[Measure], fields: List[Field], mfp_func) -> Field:
+    np_fields = [f.field for f in fields]
+    mfp_field = deepcopy(fields[0])
+    mfp_np_field = mfp_func(measures=measures, fields=np_fields)
+    mfp_field.field = mfp_np_field
+    return mfp_field
 
 
 def mfp(measures: List[Measure], env: Troposphere, search_area: SearchArea) -> List[Field]:
@@ -95,8 +103,10 @@ def mfp(measures: List[Measure], env: Troposphere, search_area: SearchArea) -> L
         kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=shifted_env,
                                              min_range_m=shifted_search_area.min_x_m,
                                              max_range_m=shifted_search_area.max_x_m,
+                                             inverse=True
                                              )
         field = kdc.calculate()
+        field.x_grid += measure.x_m
         fields.append(field)
     return fields
 
@@ -115,8 +125,7 @@ plt.xlabel('Range (m)')
 plt.ylabel('Height (m)')
 plt.show()
 
-
-bartlett_mfp_field = bartlett_mvp(measures=measures, fields=fields)
+bartlett_mfp_field = rwp_mfp(measures, fields, bartlett_mfp)
 vis = FieldVisualiser(bartlett_mfp_field, env=env, trans_func=lambda v: 10 * cm.log10(1e-16 + abs(v)), label='ke')
 plt = vis.plot2d(min=vis.max-5, max=vis.max)
 plt.title('The intensity of the field component 10log10|u|')
@@ -124,7 +133,7 @@ plt.xlabel('Range (m)')
 plt.ylabel('Height (m)')
 plt.show()
 
-mv_mfp_field = mv_mvp(measures=measures, fields=fields)
+mv_mfp_field = rwp_mfp(measures, fields, mv_mfp)
 vis = FieldVisualiser(mv_mfp_field, env=env, trans_func=lambda v: 10 * cm.log10(1e-66 + abs(v)), label='ke')
 plt = vis.plot2d(min=vis.max-10, max=vis.max)
 plt.title('The intensity of the field component 10log10|u|')
