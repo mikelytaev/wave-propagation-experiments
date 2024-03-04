@@ -96,7 +96,7 @@ def show(fwd_field, bartlett_mfp_field, mv_mfp_field, src: Source, measures: Lis
     ax[2].set_yticklabels([])
     ax[2].set_title("MV, dB", fontsize=13)
     ax[2].grid(True)
-    x_src, z_src = bartlett_mfp_field.argmax()
+    x_src, z_src = mv_mfp_field.argmax()
     ax[2].plot(x_src, z_src, '*', color='white')
 
     for kn in env.knife_edges:
