@@ -32,6 +32,13 @@ def plot_profile_prop_density(M_profile: RandomProfile, ax, max_height_m=300, m_
     return im
 
 
+sd0 = RandomSurfaceDuct(
+        height=norm(loc=200, scale=0.00005),
+        m0=norm(loc=350, scale=0.00005),
+        m1=norm(loc=300, scale=0.00005),
+        slope=norm(loc=0.15, scale=0.00005)
+    )
+
 sd1 = RandomSurfaceDuct(
         height=norm(loc=200, scale=1),
         m0=norm(loc=350, scale=1),
@@ -54,18 +61,21 @@ sd3 = RandomSurfaceDuct(
     )
 
 plt.rcParams['font.size'] = '8'
-f, ax = plt.subplots(1, 3, figsize=(4, 2.5), constrained_layout=True)
-plot_profile_prop_density(sd1, ax[0])
-plot_profile_prop_density(sd2, ax[1])
-im = plot_profile_prop_density(sd3, ax[2])
+f, ax = plt.subplots(1, 4, figsize=(6, 2.5), constrained_layout=True)
+plot_profile_prop_density(sd0, ax[0])
+plot_profile_prop_density(sd1, ax[1])
+plot_profile_prop_density(sd2, ax[2])
+im = plot_profile_prop_density(sd3, ax[3])
 
 ax[0].set_ylabel("Height (m)", fontsize=8)
-ax[0].set_title("σ=1 M-unit", fontsize=8)
-ax[1].set_title("σ=2 M-units", fontsize=8)
-ax[2].set_title("σ=5 M-units", fontsize=8)
+ax[0].set_title("σ=0 M-unit", fontsize=8)
+ax[1].set_title("σ=1 M-unit", fontsize=8)
+ax[2].set_title("σ=2 M-units", fontsize=8)
+ax[3].set_title("σ=5 M-units", fontsize=8)
 ax[0].set_xlabel("M-profile", fontsize=8)
 ax[1].set_xlabel("M-profile", fontsize=8)
 ax[2].set_xlabel("M-profile", fontsize=8)
+ax[3].set_xlabel("M-profile", fontsize=8)
 
 for a in ax[:]:
     for label in (a.get_xticklabels() + a.get_yticklabels()):

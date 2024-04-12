@@ -5,10 +5,13 @@ from rwp.vis import *
 from scipy.stats import norm
 
 
-def show(random_field: RandomField, mean_index_field: Field):
+def show(random_field: RandomField, mean_index_field: Field, presentation_mode=False):
     plt.rcParams['font.size'] = '13'
-    f, ax = plt.subplots(1, 4, figsize=(9, 2.5), constrained_layout=True)
-    # ax = [a[0, 0], a[0, 1], a[1, 0], a[1, 1]]
+    if presentation_mode:
+        f, a = plt.subplots(2, 2, figsize=(9, 6), constrained_layout=True)
+        ax = [a[0, 0], a[0, 1], a[1, 0], a[1, 1]]
+    else:
+        f, ax = plt.subplots(1, 4, figsize=(9, 2.5), constrained_layout=True)
     norm = Normalize(100, 200)
     extent = [mean_index_field.x_grid[0] * 1E-3, mean_index_field.x_grid[-1] * 1E-3, mean_index_field.z_grid[0], mean_index_field.z_grid[-1]]
     im = ax[0].imshow(mean_index_field.field.T[::-1, :], extent=extent, norm=norm, aspect='auto', cmap=plt.get_cmap('jet'))
@@ -35,7 +38,8 @@ def show(random_field: RandomField, mean_index_field: Field):
     f.colorbar(im, ax=ax[2], fraction=0.046, location='bottom')
     ax[2].set_xlabel("Range (km)", fontsize=13)
     ax[2].set_yticklabels([])
-    # ax[2].set_ylabel("Height (m)")
+    if presentation_mode:
+        ax[2].set_ylabel("Height (m)")
     ax[2].set_title("L - E[L]")
     ax[2].grid(True)
 
@@ -79,5 +83,5 @@ def calc(M_profile, range_m, height_m, freq_hz, ant_height, file_name, max_monte
     random_field = rwp_ss_pade_r(antenna=antenna, env=environment, params=params).path_loss()
     mean_index_field = rwp_ss_pade(antenna=antenna, env=environment, params=params).path_loss()
 
-    show(random_field, mean_index_field)
+    show(random_field, mean_index_field, presentation_mode=True)
     plt.savefig(file_name)
