@@ -1,6 +1,7 @@
 from matplotlib.colors import Normalize
 
 from propagators.mfp import Measure, SearchArea, bartlett_mfp, mv_mfp
+from propagators.utils import is_list_equal
 from rwp.kediffraction import *
 from rwp.vis import *
 
@@ -14,27 +15,46 @@ def rwp_mfp(measures: List[Measure], fields: List[Field], mfp_func) -> Field:
 
 def fields_from_measures(measures: List[Measure], env: Troposphere, search_area: SearchArea) -> List[Field]:
     fields = []
-    for ind_m, measure in enumerate(measures):
-        antenna = PointSource(freq_hz=measure.freq_hz, height_m=measure.height_m)
+    if is_list_equal([m.x_m for m in measures]) and False:
+        measure_x = measures[0].x_m
+        antenna = VerticalArray(freq_hz=measures[0].freq_hz, heights_m=[m.height_m for m in measures])
         shifted_env = deepcopy(env)
         shifted_search_area = deepcopy(search_area)
         for knife_edge in shifted_env.knife_edges:
-            knife_edge.range -= measure.x_m
-        shifted_search_area.min_x_m -= measure.x_m
-        shifted_search_area.max_x_m -= measure.x_m
+            knife_edge.range -= measure_x
+        shifted_search_area.min_x_m -= measure_x
+        shifted_search_area.max_x_m -= measure_x
         kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=shifted_env,
                                              min_range_m=shifted_search_area.min_x_m,
                                              max_range_m=shifted_search_area.max_x_m,
                                              inverse=True
                                              )
-        field = kdc.calculate()
-        field.x_grid += measure.x_m
-        fields.append(field)
-        print(f'{ind_m / len(measures) * 100}%')
-    return fields
+        fields = kdc.calculate()
+        for field in fields:
+            field.x_grid += measure_x
+        return fields
+    else:
+        for ind_m, measure in enumerate(measures):
+            antenna = PointSource(freq_hz=measure.freq_hz, height_m=measure.height_m)
+            shifted_env = deepcopy(env)
+            shifted_search_area = deepcopy(search_area)
+            for knife_edge in shifted_env.knife_edges:
+                knife_edge.range -= measure.x_m
+            shifted_search_area.min_x_m -= measure.x_m
+            shifted_search_area.max_x_m -= measure.x_m
+            kdc = KnifeEdgeDiffractionCalculator(src=antenna, env=shifted_env,
+                                                 min_range_m=shifted_search_area.min_x_m,
+                                                 max_range_m=shifted_search_area.max_x_m,
+                                                 inverse=True
+                                                 )
+            field = kdc.calculate()
+            field.x_grid += measure.x_m
+            fields.append(field)
+            print(f'{ind_m / len(measures) * 100}%')
+        return fields
 
 
-def calc(src: Source, true_env: Troposphere, range_bounds_m, measures: List[Measure], search_area :SearchArea,
+def calc(src: Source, true_env: Troposphere, range_bounds_m, measures: List[Measure], search_area: SearchArea,
          expected_env: Troposphere = None):
     if not expected_env:
         expected_env = true_env
@@ -66,9 +86,9 @@ def show(fwd_field, bartlett_mfp_field, mv_mfp_field, src: Source, measures: Lis
     extent_fwd = [fwd_field.x_grid[0], fwd_field.x_grid[-1], fwd_field.z_grid[0], fwd_field.z_grid[-1]]
     im = ax[0].imshow(field, extent=extent_fwd, norm=norm_fwd, aspect='auto', cmap=plt.get_cmap('jet'))
     f.colorbar(im, ax=ax[0], fraction=0.046, location='bottom')
-    ax[0].set_xlabel("Range (m)", fontsize=13)
-    ax[0].set_ylabel("Height (m)", fontsize=13)
-    ax[0].set_title("10log(|u|), dB", fontsize=13)
+    ax[0].set_xlabel("Расстояние, м", fontsize=13)
+    ax[0].set_ylabel("Высота. м", fontsize=13)
+    ax[0].set_title("10log(|φ|), дБ", fontsize=13)
     ax[0].grid(True)
     ax[0].plot(0, src.height_m, '*', color='white')
     for m in measures:
@@ -81,9 +101,9 @@ def show(fwd_field, bartlett_mfp_field, mv_mfp_field, src: Source, measures: Lis
                        bartlett_mfp_field.z_grid[0], bartlett_mfp_field.z_grid[-1]]
     im = ax[1].imshow(field, extent=extent_bartlett, norm=norm_bartlett, aspect='auto', cmap=plt.get_cmap('jet'))
     f.colorbar(im, ax=ax[1], fraction=0.046, location='bottom')
-    ax[1].set_xlabel("Range (m)", fontsize=13)
+    ax[1].set_xlabel("Расстояние, м", fontsize=13)
     ax[1].set_yticklabels([])
-    ax[1].set_title("Bartlett, dB", fontsize=13)
+    ax[1].set_title("Бартлет, дБ", fontsize=13)
     ax[1].grid(True)
     x_src, z_src = bartlett_mfp_field.argmax()
     ax[1].plot(x_src, z_src, '*', color='white')
@@ -95,9 +115,9 @@ def show(fwd_field, bartlett_mfp_field, mv_mfp_field, src: Source, measures: Lis
                  mv_mfp_field.z_grid[-1]]
     im = ax[2].imshow(field, extent=extent_mv, norm=norm_mv, aspect='auto', cmap=plt.get_cmap('jet'))
     f.colorbar(im, ax=ax[2], fraction=0.046, location='bottom')
-    ax[2].set_xlabel("Range (m)", fontsize=13)
+    ax[2].set_xlabel("Расстояние, м", fontsize=13)
     ax[2].set_yticklabels([])
-    ax[2].set_title("MV, dB", fontsize=13)
+    ax[2].set_title("Кейпон, дБ", fontsize=13)
     ax[2].grid(True)
     x_src, z_src = mv_mfp_field.argmax()
     ax[2].plot(x_src, z_src, '*', color='white')
