@@ -11,6 +11,7 @@ import jax.random as jr
 import optax
 from matplotlib.colors import Normalize
 import cmath as cm
+import lineax
 
 
 import matplotlib.pyplot as plt
@@ -173,6 +174,9 @@ plt.imshow(
 )
 plt.colorbar()
 plt.show()
+
+
+gfds
 
 
 @eqx.filter_value_and_grad
