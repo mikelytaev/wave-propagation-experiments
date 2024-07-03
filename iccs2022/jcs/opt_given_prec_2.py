@@ -45,7 +45,7 @@ def fit_func(coefs_arr):
 def get_pade_opt_grid(*, theta_max_degrees, order, grid_bounds=None, eps=3e-4, eps_x_max=3e3):
     def constraint_pade_2nd_order(coefs_arr):
         dx, dz = opt_coefs_to_grids(coefs_arr)
-        pade_coefs, _ = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2 * cm.pi, dx=dx)
+        pade_coefs, _ = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx)
         num_coefs = np.array([a[0] for a in pade_coefs])
         den_coefs = np.array([a[1] for a in pade_coefs])
         err = disp_rels.k_x_abs_error_range(2 * cm.pi, dx, dz, num_coefs, den_coefs,

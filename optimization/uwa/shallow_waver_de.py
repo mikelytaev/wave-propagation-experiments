@@ -75,7 +75,7 @@ plt.colorbar()
 plt.grid(True)
 plt.show()
 
-pade_coefs = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, k0=2 * cm.pi, dx=dr_wl)
+pade_coefs = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, beta=2 * cm.pi, dx=dr_wl)
 pade_coefs_num = np.array([a[0] for a in pade_coefs])
 pade_coefs_den = np.array([a[1] for a in pade_coefs])
 errors_pade = approx_error(pade_coefs_num, pade_coefs_den, xi_grid_2d.flatten(), dr_wl).reshape(shape) * (max_range_wl / dr_wl)

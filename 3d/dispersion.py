@@ -47,7 +47,7 @@ def discrete_k_x_2d(shift=False):
     k0sh = 2 * fm.pi * freq_hz / c0 if shift else k0
     xi = xi2(k0, k0sh)
     print(f"{np.min(xi)} {np.max(xi)}")
-    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=k0sh, dx=dx_m)
+    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=k0sh, dx=dx_m)
     t = c0
     for (a, b) in pade_coefs:
         t *= (1 + a*xi) / (1 + b*xi)

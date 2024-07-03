@@ -46,7 +46,7 @@ def fit_func(coefs_arr):
 
 
 order = (4, 4)
-pade_coefs = pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2*cm.pi, dx=dx)
+pade_coefs = pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx)
 co = coefs_to_opt_coefs(pade_coefs)
 print(fit_func(co))
 

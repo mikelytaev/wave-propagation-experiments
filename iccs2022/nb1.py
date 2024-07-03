@@ -46,7 +46,7 @@ def k_x_angle(dx, dz, num_coefs, den_coefs, kz_arr):
     return np.array([disp_rels.discrete_k_x(k0, dx, dz, num_coefs, den_coefs, kz) for kz in kz_arr])
 
 
-pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2*cm.pi, dx=dx)
+pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx)
 pade_coefs_num = np.array([a[0] for a in pade_coefs])
 pade_coefs_den = np.array([a[1] for a in pade_coefs])
 

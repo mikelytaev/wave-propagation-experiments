@@ -34,7 +34,7 @@ grid_im = np.linspace(-0.1, xi_bound, 500)
 i_grid, j_grid = np.meshgrid(grid_re, grid_im)
 xi_grid_2d = i_grid + 1j*j_grid
 shape = xi_grid_2d.shape
-pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, k0=2 * cm.pi, dx=dr_wl)
+pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, beta=2 * cm.pi, dx=dr_wl)
 pade_coefs_num = np.array([a[0] for a in pade_coefs])
 pade_coefs_den = np.array([a[1] for a in pade_coefs])
 errors_pade = approx_error(pade_coefs_num, pade_coefs_den, xi_grid_2d.flatten(), dr_wl).reshape(shape) * (max_range_wl / dr_wl)

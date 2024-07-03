@@ -36,11 +36,11 @@ def diff2(s):
     return mpmath.acosh(1 + (k0 * dz_wl) ** 2 * s / 2) ** 2 / (k0 * dz_wl) ** 2
 
 
-joined_pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=diff2, k0=2*cm.pi, dx=dx_wl)
+joined_pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=diff2, beta=2 * cm.pi, dx=dx_wl)
 joined_pade_coefs_num = np.array([a[0] for a in joined_pade_coefs])
 joined_pade_coefs_den = np.array([a[1] for a in joined_pade_coefs])
 
-pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2*cm.pi, dx=dx_wl)
+pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx_wl)
 pade_coefs_num = np.array([a[0] for a in pade_coefs])
 pade_coefs_den = np.array([a[1] for a in pade_coefs])
 

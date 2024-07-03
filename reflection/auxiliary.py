@@ -5,7 +5,7 @@ wl = 0.1
 k0 = 2*cm.pi / wl
 dx = 1
 dz = 0.1
-coefs = pade_propagator_coefs(pade_order=(1, 1), diff2=lambda x: x, k0=k0, dx=dx, spe=False)
+coefs = pade_propagator_coefs(pade_order=(1, 1), diff2=lambda x: x, beta=k0, dx=dx, spe=False)
 (a, b) = coefs[0]
 
 tau = 1.2

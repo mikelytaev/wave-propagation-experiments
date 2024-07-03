@@ -9,7 +9,7 @@ def err_2d(*, freq_hz, dx_m, dz_m, theta_max_degrees, pade_order, z_order=4, shi
     k0 = 2 * fm.pi * freq_hz / 3E8
     c0 = fm.sqrt(2 / (1 + fm.cos(fm.radians(theta_max_degrees)) ** 2)) * 3e8
     k0sh = 2 * fm.pi * freq_hz / c0 if shift else k0
-    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, k0=k0sh, dx=dx_m, a0=0)
+    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, beta=k0sh, dx=dx_m, a0=0)
     k_z_bounds = k_z_bounds if k_z_bounds is not None else (-k0 * fm.sin(fm.radians(theta_max_degrees)), k0 * fm.sin(fm.radians(theta_max_degrees)))
     k_y_grid = np.linspace(k_z_bounds[0], k_z_bounds[1], n)
     k_z_grid = np.linspace(k_z_bounds[0], k_z_bounds[1], n)
@@ -38,7 +38,7 @@ def err_theta(*, freq_hz, dx_m, dz_m, theta_max_degrees, phi_degrees, pade_order
     k0 = 2 * fm.pi * freq_hz / 3E8
     c0 = fm.sqrt(2 / (1 + fm.cos(fm.radians(theta_max_degrees)) ** 2)) * 3e8
     k0sh = 2 * fm.pi * freq_hz / c0 if shift else k0
-    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, k0=k0sh, dx=dx_m, a0=0)
+    pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, beta=k0sh, dx=dx_m, a0=0)
     theta_grid_degrees = np.linspace(0, theta_max_degrees, n)
     theta_grid = np.linspace(0, fm.radians(theta_max_degrees), n)
     k_y_grid = k0 * fm.cos(fm.radians(phi_degrees)) * np.sin(theta_grid)
@@ -78,7 +78,7 @@ def precision_step(k0, k0sh, theta_max_degrees, dxs_m, dzs_m, pade_order, z_orde
             print((np.min(xis), np.max(xis)))
             pade_coefs, c0 = cheb_pade_coefs(k0sh, dx_m, pade_order, (np.min(xis), np.max(xis)), "ratinterp")
         else:
-            pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, k0=k0sh, dx=dx_m, a0=0)
+            pade_coefs, c0 = utils.pade_propagator_coefs(pade_order=pade_order, diff2=lambda x: x, beta=k0sh, dx=dx_m, a0=0)
         for dz_i, dz_m in enumerate(dzs_m):
             xi_y = -(2*np.sin(k_y_grid*dz_m/2) / (k0sh*dz_m))**2 - z*4/3*np.sin(k_y_grid*dz_m/2)**4 / (k0sh*dz_m)**2 + alpha/2
             xi_z = -(2*np.sin(k_z_grid*dz_m/2) / (k0sh*dz_m))**2 - z*4/3*np.sin(k_z_grid*dz_m/2)**4 / (k0sh*dz_m)**2 + alpha/2

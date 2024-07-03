@@ -150,11 +150,11 @@ coefs2, a0 = cheb_pade_coefs(dx_wl, (order[1], order[1]), fm.sin(max_propagation
 coefs2_num = np.array([a[0] for a in coefs2])
 coefs2_den = np.array([b[1] for b in coefs2])
 
-pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2 * cm.pi, dx=dx_wl)
+pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx_wl)
 pade_coefs_num = np.array([a[0] for a in pade_coefs])
 pade_coefs_den = np.array([a[1] for a in pade_coefs])
 
-pade_coefs2 = utils.pade_propagator_coefs(pade_order=(order[1], order[1]), diff2=lambda x: x, k0=2 * cm.pi, dx=dx_wl)
+pade_coefs2 = utils.pade_propagator_coefs(pade_order=(order[1], order[1]), diff2=lambda x: x, beta=2 * cm.pi, dx=dx_wl)
 pade_coefs2_num = np.array([a[0] for a in pade_coefs2])
 pade_coefs2_den = np.array([a[1] for a in pade_coefs2])
 

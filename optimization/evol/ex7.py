@@ -50,7 +50,7 @@ def diff2(s):
     return mpmath.acosh(1 + (k0 * dz_joined_pade) ** 2 * s / 2) ** 2 / (k0 * dz_joined_pade) ** 2
 
 
-joined_pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=diff2, k0=2*cm.pi, dx=dx_joined_pade)
+joined_pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=diff2, beta=2 * cm.pi, dx=dx_joined_pade)
 
 
 def k_x_angle(dx, dz, num_coefs, den_coefs, kz_arr):

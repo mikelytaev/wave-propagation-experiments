@@ -38,7 +38,7 @@ def fit_func(coefs_arr):
     return err
 
 
-pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2*cm.pi, dx=dx)
+pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx)
 x0 = coefs_to_opt_coefs(pade_coefs)
 
 bounds = [(-5, 5)] * (order[0] + order[1]) * 2

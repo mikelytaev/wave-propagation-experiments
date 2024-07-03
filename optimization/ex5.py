@@ -24,7 +24,7 @@ def pade_propagator_coefs_m(*, pade_order, diff2, k0, dx, spe=False, alpha=0):
     return pade_coefs
 
 
-coefs = pade_propagator_coefs(pade_order=(2, 2), diff2=lambda x: x, k0=2*cm.pi, dx=1)
+coefs = pade_propagator_coefs(pade_order=(2, 2), diff2=lambda x: x, beta=2 * cm.pi, dx=1)
 coefs_m = pade_propagator_coefs_m(pade_order=(2, 2), diff2=lambda x: x, k0=2*cm.pi, dx=1)
 print(coefs)
 print(coefs_m)

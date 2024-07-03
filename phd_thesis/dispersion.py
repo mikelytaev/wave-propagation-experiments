@@ -17,7 +17,7 @@ def k_x(*, k_z, dx, pade_order, dz, z_order, alpha, m=1):
         def diff2(s):
             return s
 
-    coefs = pade_propagator_coefs(pade_order=pade_order, diff2=diff2, k0=k0, dx=dx, alpha=alpha)
+    coefs = pade_propagator_coefs(pade_order=pade_order, diff2=diff2, beta=k0, dx=dx, alpha_deg=alpha)
     if m == 1:
         return np.array([discrete_k_x(k=k0, dx=dx, dz=dz, pade_coefs=coefs, kz=kz, order=z_order) for kz in k_z])
     else:

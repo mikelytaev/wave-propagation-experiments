@@ -50,7 +50,7 @@ def de_error(dx, dz, bounds, theta_max_degrees, order, mutation=(0.5, 1), recomb
 
 
 def pade_2nd_order_error(order, dx, dz, theta_max_degrees):
-    pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, k0=2*cm.pi, dx=dx)
+    pade_coefs = utils.pade_propagator_coefs(pade_order=order, diff2=lambda x: x, beta=2 * cm.pi, dx=dx)
     num_coefs = np.array([a[0] for a in pade_coefs])
     den_coefs = np.array([a[1] for a in pade_coefs])
     err = disp_rels.k_x_abs_error_range(2 * cm.pi, dx, dz, num_coefs, den_coefs, k0 * fm.sin(theta_max_degrees * fm.pi / 180),

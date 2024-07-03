@@ -17,7 +17,7 @@ def k_x(*, k_z, dx, pade_order, dz, z_order, alpha, m=1):
         def diff2(s):
             return s
 
-    coefs = pade_propagator_coefs(pade_order=pade_order, diff2=diff2, k0=k0, dx=dx, alpha=alpha)
+    coefs = pade_propagator_coefs(pade_order=pade_order, diff2=diff2, beta=k0, dx=dx, alpha_deg=alpha)
     return np.array([discrete_k_x(k=k0, dx=dx, dz=v, pade_coefs=coefs, kz=k_z, order=z_order) for v in dz])
 
 k0 = 2 * cm.pi
