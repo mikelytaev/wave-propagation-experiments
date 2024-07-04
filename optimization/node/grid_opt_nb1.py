@@ -115,34 +115,27 @@ class OptTable:
 
     def __init__(self, order=(7, 8)):
         self.order = order
-        # self.betas = np.concatenate((
-        #     np.linspace(0.1, 1, 10),
-        #     np.linspace(2, 10, 9),
-        #     [2*fm.pi]
-        # ))
-        self.betas = 2*fm.pi + np.linspace(-1, 1, 21)
-
-        self.dxs = np.concatenate((
+        self.t_betas = np.concatenate((
             np.linspace(0.1, 1, 10),
             np.linspace(2, 10, 9),
             np.linspace(20, 100, 9),
-            np.linspace(200, 1000, 9)
+            np.linspace(200, 1000, 9),
+            np.linspace(2000, 10000, 9),
+            np.linspace(20000, 50000, 4)
         ))
-        self.dxs = self.dxs[::-1]
         self.precs = np.array([1E-10, 1E-9, 1E-8, 1E-7, 1E-6, 1E-5,])
-        self.xi_a = np.empty(shape=(len(self.betas), len(self.dxs), len(self.precs)), dtype=float)
-        self.xi_b = np.empty(shape=(len(self.betas), len(self.dxs), len(self.precs)), dtype=float)
+        self.xi_a = np.empty(shape=(len(self.t_betas), len(self.precs)), dtype=float)
+        self.xi_b = np.empty(shape=(len(self.t_betas), len(self.precs)), dtype=float)
 
     def compute(self):
-        for i_beta, beta in enumerate(self.betas):
-            for i_dx, dx in enumerate(self.dxs):
-                coefs, _ = pade_propagator_coefs(pade_order=self.order, beta=beta, dx=dx)
+        for i_t_beta, t_beta in enumerate(self.t_betas):
+                coefs, _ = pade_propagator_coefs(pade_order=self.order, beta=t_beta, dx=1)
                 for i_prec, prec in enumerate(self.precs):
-                    self.xi_a[i_beta, i_dx, i_prec] = func_binary_search(
-                        lambda xi: rational_approx_error(beta*dx, xi, coefs), -1, 0, prec, 1e-3)
-                    self.xi_b[i_beta, i_dx, i_prec] = func_binary_search(
-                        lambda xi: rational_approx_error(beta * dx, xi, coefs), 0, 10, prec, 1e-3)
-                    print(f'beta={beta}, dx={dx}, prec={prec}, [{self.xi_a[i_beta, i_dx, i_prec]}, {self.xi_b[i_beta, i_dx, i_prec]}]')
+                    self.xi_a[i_t_beta, i_prec] = func_binary_search(
+                        lambda xi: rational_approx_error(t_beta, xi, coefs), -1, 0, prec, 1e-3)
+                    self.xi_b[i_t_beta, i_prec] = func_binary_search(
+                        lambda xi: rational_approx_error(t_beta, xi, coefs), 0, 10, prec, 1e-3)
+                    print(f't_beta={t_beta}, prec={prec}, [{self.xi_a[i_t_beta, i_prec]}, {self.xi_b[i_t_beta, i_prec]}]')
 
     @classmethod
     def load(cls):
@@ -153,20 +146,25 @@ class OptTable:
         pass
 
     def get_optimal(self, kz_max, k_min, k_max, required_prec) -> (float, float, float):
-        for i_dx, dx in enumerate(self.dxs):
-            for i_beta, beta in enumerate(self.betas):
-                xi_min = (k_min**2 - kz_max**2) / beta**2 - 1
-                xi_max = k_max**2 / beta**2 - 1
-                for i_prec, prec in enumerate(self.precs):
-                    if prec / dx > required_prec:
-                        continue
-                    if self.xi_a[i_beta, i_dx, i_prec] <= xi_min and xi_max <= self.xi_b[i_beta, i_dx, i_prec]:
-                        return beta, dx, prec
-        return None
+        a = k_min**2 - kz_max**2
+        b = k_max**2
+        res = fm.nan, 0.0, fm.nan
+        for i_t_beta, t_beta in enumerate(self.t_betas):
+            for i_prec, prec in enumerate(self.precs):
+                r = fm.sqrt(a / (self.xi_a[i_t_beta, i_prec] + 1))
+                l = fm.sqrt(b / (self.xi_b[i_t_beta, i_prec] + 1))
+                if l > r:
+                    continue
+                beta = l
+                dx = t_beta / beta
+                if prec / dx > required_prec:
+                    continue
+                if dx > res[1]:
+                    res = (beta, dx, prec)
+        return res
 
 
 table = OptTable()
-#table.betas = [optimal_beta(2*fm.pi*fm.sin(fm.radians(80)), 2*fm.pi, 2*fm.pi)]
 table.compute()
 
-beta, dx, prec = table.get_optimal(2*fm.pi*fm.sin(fm.radians(80)), 2*fm.pi, 2*fm.pi, 1e-3)
+beta, dx, prec = table.get_optimal(2*fm.pi*fm.sin(fm.radians(1)), 2*fm.pi, 2*fm.pi, 1e-3)
