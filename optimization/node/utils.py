@@ -53,52 +53,95 @@ class MunkProfileModel(AbstractRefractiveIndexModel):
         return unf
 
 
+class AbstractWaveSpeedModel:
+
+    def __call__(self, z):
+        pass
+
+
+class LinearWaveSpeedModel(AbstractWaveSpeedModel):
+
+    def __init__(self, c0: float, slope_degrees: float):
+        self.c0 = c0
+        self.slope_degrees = slope_degrees
+
+    def __call__(self, z):
+        return self.c0 + z * jnp.tan(jnp.radians(self.slope_degrees))
+
+    def _tree_flatten(self):
+        dynamic = (self.slope_degrees,)
+        static = {'c0': self.c0}
+        return dynamic, static
+
+    @classmethod
+    def _tree_unflatten(cls, static, dynamic):
+        return cls(slope_degrees=dynamic[0], **static)
+
+
 class RationalHelmholtzPropagator:
 
-    def __init__(self, order: tuple[float, float], k0: float, dx_m: float, dz_m: float, z_n: int, x_max_m: float, refractive_index, coefs=None):
+    def __init__(self, order: tuple[float, float], beta: float, dx_m: float, dz_m: float, x_n: int, z_n: int,
+                 x_grid_scale: int, z_grid_scale: int, freq_hz: float, wave_speed: AbstractWaveSpeedModel, coefs=None):
         self.order = order
-        self.k0 = k0
+        self.beta = beta
         self.dx_m = dx_m
         self.dz_m = dz_m
-        self.refractive_index = refractive_index
+        self.x_n = x_n
         self.z_n = z_n
-        self.het = self.refractive_index(jnp.arange(0, self.z_n) * self.dz_m) - 1.0
-        self.x_max_m = x_max_m
+        self.x_grid_scale = x_grid_scale
+        self.z_grid_scale = z_grid_scale
         if coefs is not None:
             self.coefs_t = coefs
             self.coefs = jnp.array(coefs, dtype=complex)
         else:
-            t = pade_propagator_coefs(pade_order=self.order, beta=self.k0, dx=self.dx_m)[0]
+            t = pade_propagator_coefs(pade_order=self.order, beta=self.beta, dx=self.dx_m)[0]
             a = [list(v) for v in t]
             self.coefs = jnp.array(a, dtype=complex)
             self.coefs_t = a
+        self.freq_hz = freq_hz
+        self.wave_speed = wave_speed
+        self.het = jnp.array((2*jnp.pi*self.freq_hz/self.wave_speed(self.z_computational_grid()))**2 / self.beta ** 2 - 1.0, dtype=complex)
+
+    def x_computational_grid(self):
+        return jnp.arange(0, self.x_n) * self.dx_m
+
+    def x_output_grid(self):
+        return self.x_computational_grid()[::self.x_grid_scale]
+
+    def z_computational_grid(self):
+        return jnp.arange(0, self.z_n) * self.dz_m
+
+    def z_output_grid(self):
+        return self.z_computational_grid()[::self.z_grid_scale]
 
     def _tree_flatten(self):
-        dynamic = (self.refractive_index,)
+        dynamic = (self.wave_speed,)
         static = {
             'order': self.order,
-            'k0': self.k0,
+            'beta': self.beta,
             'dx_m': self.dx_m,
             'dz_m': self.dz_m,
+            'x_n': self.x_n,
             'z_n': self.z_n,
             'coefs': self.coefs_t,
-            #'refractive_index': self.refractive_index,
-            'x_max_m': self.x_max_m
+            'x_grid_scale': self.x_grid_scale,
+            'z_grid_scale': self.z_grid_scale,
+            'freq_hz': self.freq_hz
         }
         return dynamic, static
 
     @classmethod
     def _tree_unflatten(cls, static, dynamic):
-        unf = cls(refractive_index=dynamic[0], **static)
+        unf = cls(wave_speed=dynamic[0], **static)
         return unf
 
     @jax.jit
     def _Crank_Nikolson_propagate_no_rho_4th_order(self, a, b, initial, lower_bound=(1, 0, 0), upper_bound=(0, 1, 0)):
         alpha = 1/12
-        c_a = alpha * (self.k0 * self.dz_m) ** 2 + a + alpha * a * (self.k0 * self.dz_m) ** 2 * self.het
-        c_b = alpha * (self.k0 * self.dz_m) ** 2 + b + alpha * b * (self.k0 * self.dz_m) ** 2 * self.het
-        d_a = (self.k0 * self.dz_m) ** 2 * (1 - 2 * alpha) - 2 * a + (a * (self.k0 * self.dz_m) ** 2 - 2 * a * alpha * (self.k0 * self.dz_m) ** 2) * self.het
-        d_b = (self.k0 * self.dz_m) ** 2 * (1 - 2 * alpha) - 2 * b + (b * (self.k0 * self.dz_m) ** 2 - 2 * b * alpha * (self.k0 * self.dz_m) ** 2) * self.het
+        c_a = alpha * (self.beta * self.dz_m) ** 2 + a + alpha * a * (self.beta * self.dz_m) ** 2 * self.het
+        c_b = alpha * (self.beta * self.dz_m) ** 2 + b + alpha * b * (self.beta * self.dz_m) ** 2 * self.het
+        d_a = (self.beta * self.dz_m) ** 2 * (1 - 2 * alpha) - 2 * a + (a * (self.beta * self.dz_m) ** 2 - 2 * a * alpha * (self.beta * self.dz_m) ** 2) * self.het
+        d_b = (self.beta * self.dz_m) ** 2 * (1 - 2 * alpha) - 2 * b + (b * (self.beta * self.dz_m) ** 2 - 2 * b * alpha * (self.beta * self.dz_m) ** 2) * self.het
 
         rhs = d_a * initial
         rhs = rhs.at[1::].set(rhs[1::] + c_a[:-1:] * initial[:-1:])
@@ -117,24 +160,23 @@ class RationalHelmholtzPropagator:
 
     @jax.jit
     def _step(self, initial):
-        initial = jax.lax.fori_loop(0, len(self.coefs),
+        return jax.lax.fori_loop(0, len(self.coefs),
                           lambda i, val: self._Crank_Nikolson_propagate_no_rho_4th_order(
                               self.coefs[i][0], self.coefs[i][1], val), initial)
-        return initial
 
     @jax.jit
     def compute(self, initial):
-        count = int(fm.ceil(self.x_max_m / self.dx_m))
-        self.het = self.refractive_index(jnp.arange(0, self.z_n) * self.dz_m) - 1.0
-        results = jnp.empty(shape=(count, len(initial)), dtype=complex)
+        self.het = jnp.array((2*jnp.pi*self.freq_hz/self.wave_speed(self.z_computational_grid()))**2 / self.beta ** 2 - 1.0, dtype=complex)
+        results = jnp.empty(shape=(round(self.x_n / self.x_grid_scale), round(self.z_n / self.z_grid_scale)), dtype=complex)
+        results = results.at[0, :].set(initial[::self.z_grid_scale])
 
         def body_fun(i, val):
             y0, res = val
             y1 = self._step(y0)
-            res = res.at[i, :].set(y1)
+            res = res.at[jnp.ceil(i / self.x_grid_scale).astype(int), :].set(y1[::self.z_grid_scale])
             return y1, res
 
-        _, results = jax.lax.fori_loop(0, count, body_fun, (initial, results))
+        _, results = jax.lax.fori_loop(0, self.x_n, body_fun, (initial, results))
 
         return results
 
@@ -149,3 +191,6 @@ tree_util.register_pytree_node(EmptyRefractiveIndexModel,
 tree_util.register_pytree_node(RationalHelmholtzPropagator,
                                RationalHelmholtzPropagator._tree_flatten,
                                RationalHelmholtzPropagator._tree_unflatten)
+tree_util.register_pytree_node(LinearWaveSpeedModel,
+                               LinearWaveSpeedModel._tree_flatten,
+                               LinearWaveSpeedModel._tree_unflatten)

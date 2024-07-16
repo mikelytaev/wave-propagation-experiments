@@ -34,7 +34,7 @@ het = (1500/het)**2-1
 x_max_m = 20000
 
 model = RationalHelmholtzPropagator(
-    k0=k0,
+    beta=k0,
     dx_m=100,
     dz_m=z_grid[1]-z_grid[0],
     z_n=1000,
@@ -144,7 +144,7 @@ c_phase = 1.0 * jnp.pi / 180.0
 
 optim = optax.adabelief(100)
 training_model = RationalHelmholtzPropagator(
-    k0=k0,
+    beta=k0,
     dx_m=100,
     dz_m=z_grid[1]-z_grid[0],
     z_n=1000,
