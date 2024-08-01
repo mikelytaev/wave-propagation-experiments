@@ -12,7 +12,7 @@ import scipy
 
 import matplotlib.pyplot as plt
 
-from experiments.optimization.node.utils import RationalHelmholtzPropagator, EmptyRefractiveIndexModel, MunkProfileModel
+from experiments.optimization.node.helmholtz_jax import RationalHelmholtzPropagator, EmptyRefractiveIndexModel, MunkProfileModel
 import math as fm
 
 from uwa.environment import munk_profile
