@@ -22,7 +22,7 @@ class RegularGrid:
         return a_i, b_i
 
     def array_grid(self, a_i, b_i):
-        return jnp.arange(a_i, b_i) * self.dx
+        return jnp.arange(max(a_i, 0), min(b_i, self.n)) * self.dx
 
     def __eq__(self, other):
         return isinstance(other, type(self)) and ((self.start, self.dx, self.n) == (other.start, other.dx, other.n))
@@ -48,10 +48,14 @@ tree_util.register_pytree_node(RegularGrid,
                                RegularGrid._tree_flatten,
                                RegularGrid._tree_unflatten)
 
+
 class AbstractWaveSpeedModel:
 
     def __call__(self, z):
         pass
+
+    def on_regular_grid(self, z_grid: RegularGrid):
+        return self(z_grid.array_grid(0, 100000000))
 
 
 class ConstWaveSpeedModel(AbstractWaveSpeedModel):
@@ -84,7 +88,7 @@ class LinearSlopeWaveSpeedModel(AbstractWaveSpeedModel):
         self.slope_degrees = slope_degrees
 
     def __call__(self, z):
-        return self.c0 + z * jnp.tan(jnp.radians(self.slope_degrees))
+        return self.c0 + z * jnp.sin(jnp.radians(self.slope_degrees)) / jnp.cos(jnp.radians(self.slope_degrees))#jnp.tan(jnp.radians(self.slope_degrees))
 
     def _tree_flatten(self):
         dynamic = (self.c0, self.slope_degrees)
@@ -384,7 +388,11 @@ class RationalHelmholtzPropagator:
         return jax.lax.fori_loop(1, i, body_fun, jnp.zeros(max(self.order), dtype=complex))
 
     @jax.jit
-    def compute(self, initial):
+    def compute(self, initial, slope):
+        self.wave_speed = LinearSlopeWaveSpeedModel(
+                c0=1500.0,
+                slope_degrees=slope
+            )
         self._prepare_het_arrays()
 
         results = jnp.empty(shape=(self.x_n // self.x_grid_scale, self.z_n // self.z_grid_scale), dtype=complex)
