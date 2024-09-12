@@ -14,6 +14,8 @@ import jax
 
 import matplotlib.pyplot as plt
 
+from uwa.field import AcousticPressureField
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -41,7 +43,7 @@ env = UnderwaterEnvironmentModel(
 params = ComputationalParams(
     max_range_m=50000,
     max_depth_m=500,
-    x_output_points=1000,
+    x_output_points=500,
     z_output_points=500,
 )
 
@@ -52,6 +54,30 @@ plt.imshow(
     norm=Normalize(vmin=-80, vmax=-35),
     aspect='auto',
     extent=[0, field.x_grid[-1], field.z_grid[-1], 0],
+    cmap=plt.get_cmap('jet')
+)
+plt.colorbar()
+plt.grid(True)
+plt.show()
+
+
+model = uwa_get_model(src=src, env=env, params=params)
+
+env.layers[0].sound_speed_profile_m_s = ConstWaveSpeedModel(c0=1500.0)
+c0 = env.layers[0].sound_speed_profile_m_s(src.depth_m)
+k0 = 2 * fm.pi * src.freq_hz / c0
+init = src.aperture(k0, model.z_computational_grid())
+
+f = model.compute(init)
+field2 = AcousticPressureField(freq_hz=src.freq_hz, x_grid=model.x_output_grid(), z_grid=model.z_output_grid(),
+                                 field=f)
+
+plt.figure(figsize=(6, 3.2))
+plt.imshow(
+    20*jnp.log10(jnp.abs(field2.field+1e-16)).T,
+    norm=Normalize(vmin=-80, vmax=-35),
+    aspect='auto',
+    extent=[0, field2.x_grid[-1], field2.z_grid[-1], 0],
     cmap=plt.get_cmap('jet')
 )
 plt.colorbar()

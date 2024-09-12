@@ -20,7 +20,7 @@ def func(z):
     return jnp.sin(z / 1.5)
 
 
-v_d = expected_value_jacfwd(func, 5.0, 1.5, 8)
+v_d = expected_value_jacfwd(func, 5.0, 1.5, 6)
 v_j = expected_value_jet(func, 5.0, 1.5, 40)
 v_q = expected_value_quad(func, 5.0, 1.5, 5001)
 

@@ -266,6 +266,7 @@ class RationalHelmholtzPropagator:
         return unf
 
     def _calc_nlbc(self, beta):
+        return jnp.zeros((self.x_n, self.coefs.shape[0], self.coefs.shape[0]), dtype=complex)
         def diff_eq_solution_ratio(s):
             a_m1 = 1 - self.alpha * (self.beta * self.dz_m) ** 2 * (s - beta)
             a_1 = 1 - self.alpha * (self.beta * self.dz_m) ** 2 * (s - beta)
@@ -385,14 +386,11 @@ class RationalHelmholtzPropagator:
         def body_fun(ind, val):
             return val + a[ind] @ b[i-ind]
 
-        return jax.lax.fori_loop(1, i, body_fun, jnp.zeros(max(self.order), dtype=complex))
+        #return jax.lax.fori_loop(1, i, body_fun, jnp.zeros(max(self.order), dtype=complex))
+        return jnp.zeros(max(self.order), dtype=complex)
 
     @jax.jit
-    def compute(self, initial, slope):
-        self.wave_speed = LinearSlopeWaveSpeedModel(
-                c0=1500.0,
-                slope_degrees=slope
-            )
+    def compute(self, initial):
         self._prepare_het_arrays()
 
         results = jnp.empty(shape=(self.x_n // self.x_grid_scale, self.z_n // self.z_grid_scale), dtype=complex)

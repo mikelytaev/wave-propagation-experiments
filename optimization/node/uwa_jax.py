@@ -135,16 +135,21 @@ class UnderwaterEnvironmentModel:
         return sum([layer.height_m for layer in self.layers[:-1]])
 
     def _tree_flatten(self):
-        dynamic = ()
+        dynamic = (self.layers,)
         static = {
-            'layers': self.layers
+
         }
         return dynamic, static
 
     @classmethod
     def _tree_unflatten(cls, static, dynamic):
-        unf = cls(**static)
+        unf = cls(dynamic[0])
         return unf
+
+
+tree_util.register_pytree_node(UnderwaterEnvironmentModel,
+                               UnderwaterEnvironmentModel._tree_flatten,
+                               UnderwaterEnvironmentModel._tree_unflatten)
 
 
 class ProxyWaveSpeedModel(AbstractWaveSpeedModel):
@@ -329,7 +334,4 @@ tree_util.register_pytree_node(GaussSourceModel,
                                GaussSourceModel._tree_flatten,
                                GaussSourceModel._tree_unflatten)
 
-tree_util.register_pytree_node(UnderwaterEnvironmentModel,
-                               UnderwaterEnvironmentModel._tree_flatten,
-                               UnderwaterEnvironmentModel._tree_unflatten)
 
