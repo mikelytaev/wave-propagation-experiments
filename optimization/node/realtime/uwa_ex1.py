@@ -149,30 +149,29 @@ def get_opt_solution(measure, x0):
 
 env_replica.layers[0].sound_speed_profile_m_s.sound_speed = replica_z_grid_m*0.0 + 1500.0 + jax.random.uniform(jax.random.PRNGKey(0), (20,))*0.2
 simulated_ssp_list = []
-inverted_ssp_list = []
-nfev_list = []
-njev_list = []
-opt_time_list = []
+
 for lower in linspace(1500.0, 1510, 21):
     env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([1500.0, lower])
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
-    measure = get_field(simulated_model, src, env_simulated)[-1, :]
-
-    t = time.time()
-    m = get_opt_solution(measure=measure, x0=env_replica.layers[0].sound_speed_profile_m_s.sound_speed)
-    opt_time_list += [time.time() - t]
-    print(m)
-    nfev_list += [m.nfev]
-    njev_list += [m.njev]
-    env_replica.layers[0].sound_speed_profile_m_s.sound_speed = m.x
-    inverted_ssp_list += [deepcopy(env_replica.layers[0].sound_speed_profile_m_s)]
-    print(f'lower = {lower}; {m.x[-1]}; loss0 = {loss0(env_replica.layers[0].sound_speed_profile_m_s.sound_speed, measure)}')
-
 
 env_simulated.layers[0].sound_speed_profile_m_s.z_grid_m = jnp.array([0.0, 75, 200])
 for upper in linspace(1500.0, 1510, 21):
     env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([upper, (lower+1500.0)/2, lower])
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
+
+ms = env_simulated.layers[0].sound_speed_profile_m_s(75.0)
+for middle in linspace(ms, 1510, 10):
+    env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([upper, middle, lower])
+    simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
+
+inverted_ssp_list = []
+nfev_list = []
+njev_list = []
+opt_time_list = []
+ssp_error_list = []
+dz = replica_z_grid_m[1] - replica_z_grid_m[0]
+for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
+    env_simulated.layers[0].sound_speed_profile_m_s = simulated_ssp
     measure = get_field(simulated_model, src, env_simulated)[-1, :]
 
     t = time.time()
@@ -183,13 +182,12 @@ for upper in linspace(1500.0, 1510, 21):
     njev_list += [m.njev]
     env_replica.layers[0].sound_speed_profile_m_s.sound_speed = m.x
     inverted_ssp_list += [deepcopy(env_replica.layers[0].sound_speed_profile_m_s)]
-    print(f'upper = {upper}; {m.x[0]}; loss0 = {loss0(env_replica.layers[0].sound_speed_profile_m_s.sound_speed, measure)}')
 
+    d = simulated_ssp(replica_z_grid_m) - inverted_ssp_list[-1](replica_z_grid_m)
+    ssp_error_list += [jnp.linalg.norm(jnp.diff(d) / dz) * jnp.sqrt(dz)]
 
-# plt.plot(env_replica.layers[0].sound_speed_profile_m_s.z_grid_m, env_replica.layers[0].sound_speed_profile_m_s.sound_speed)
-# plt.plot(env_simulated.layers[0].sound_speed_profile_m_s.z_grid_m, env_simulated.layers[0].sound_speed_profile_m_s.sound_speed)
-# plt.grid(True)
-# plt.show()
+    print(f'Step: {sssp_i}/{len(simulated_ssp_list)}; SSP error = {ssp_error_list[-1]}')
+
 
 f, ax = plt.subplots(2, 1, figsize=(10, 5), constrained_layout=True)
 for i, simulated_ssp in enumerate(simulated_ssp_list):
@@ -208,12 +206,10 @@ ax[1].grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_dynamics.eps')
 
-ssp_error_list = []
-dz = replica_z_grid_m[1] - replica_z_grid_m[0]
+
 f, ax = plt.subplots(1, 1, figsize=(10, 3.2), constrained_layout=True)
 for i in range(0, len(simulated_ssp_list)):
     d = simulated_ssp_list[i](replica_z_grid_m) - inverted_ssp_list[i](replica_z_grid_m)
-    ssp_error_list += [jnp.linalg.norm(jnp.diff(d)/dz) * jnp.sqrt(dz)]
     ax.plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
 ax.set_xlabel('SSP difference (m/s)')
 ax.set_ylabel('Depth (m)')
@@ -223,20 +219,39 @@ ax.grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_error_pw.eps')
 
+
+ssp_norm_list = []
+for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
+    d = simulated_ssp(replica_z_grid_m)
+    ssp_norm_list += [jnp.linalg.norm(jnp.diff(d) / dz) * jnp.sqrt(dz)]
+
+
 plt.figure(figsize=(10, 3.2), constrained_layout=True)
 plt.plot(range(0, len(ssp_error_list)), ssp_error_list)
 plt.xlabel('Number of iteration')
-plt.xticks(range(0, len(ssp_error_list)))
+plt.xticks(range(0, len(ssp_error_list))[::2])
+plt.xlim([0, len(ssp_error_list)-1])
 plt.ylabel('||error||')
 plt.grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_error_norm.eps')
 
-plt.figure(figsize=(6, 3.2), constrained_layout=True)
+rel_error = np.array(ssp_error_list) / np.array(ssp_norm_list)
+plt.figure(figsize=(10, 3.2), constrained_layout=True)
+plt.plot(range(0, len(rel_error)), rel_error)
+plt.xlabel('Number of iteration')
+plt.xticks(range(0, len(rel_error))[::2])
+plt.xlim([0, len(rel_error)-1])
+plt.ylabel('||rel. error||')
+plt.grid(True)
+plt.show()
+#plt.savefig('ex1_ssp_rel_error_norm.eps')
+
+plt.figure(figsize=(10, 3.2), constrained_layout=True)
 plt.plot(range(0, len(nfev_list)), nfev_list, label='nfev')
 plt.plot(range(0, len(njev_list)), njev_list, label='njev')
 plt.xlabel('Number of iteration')
-plt.xticks(range(0, len(nfev_list)))
+plt.xticks(range(0, len(nfev_list))[::2])
 plt.xlim([0, len(nfev_list)-1])
 plt.ylim([0, max(nfev_list + njev_list)])
 plt.ylabel('Number of evaluations')
@@ -245,11 +260,12 @@ plt.legend()
 plt.show()
 #plt.savefig('ex1_n_evals.eps')
 
-plt.figure(figsize=(6, 3.2), constrained_layout=True)
+plt.figure(figsize=(10, 3.2), constrained_layout=True)
 plt.plot(range(0, len(opt_time_list)), opt_time_list)
 plt.xlabel('Number of iteration')
-plt.xticks(range(0, len(opt_time_list)))
+plt.xticks(range(0, len(opt_time_list))[::2])
 plt.xlim([0, len(opt_time_list)-1])
+plt.ylim([0, max(opt_time_list)])
 plt.ylabel('Time (s)')
 plt.grid(True)
 plt.show()
@@ -271,19 +287,19 @@ vis_model = uwa_get_model(
 env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[0]
 f_sim_0 = get_field(vis_model, src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[round(len(simulated_ssp_list)/2)]
+env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[21]
 f_sim_1 = get_field(vis_model, src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[-1]
+env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[42]
 f_sim_2 = get_field(vis_model, src, env_vis)
 
 env_vis.layers[0].sound_speed_profile_m_s = inverted_ssp_list[0]
 f_inv_0 = get_field(vis_model, src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = inverted_ssp_list[round(len(inverted_ssp_list)/2)]
+env_vis.layers[0].sound_speed_profile_m_s = inverted_ssp_list[21]
 f_inv_1 = get_field(vis_model, src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = inverted_ssp_list[-1]
+env_vis.layers[0].sound_speed_profile_m_s = inverted_ssp_list[42]
 f_inv_2 = get_field(vis_model, src, env_vis)
 
 
