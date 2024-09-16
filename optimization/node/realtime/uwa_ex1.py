@@ -175,8 +175,12 @@ for upper in linspace(1500.0, 1510, 21):
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
     measure = get_field(simulated_model, src, env_simulated)[-1, :]
 
+    t = time.time()
     m = get_opt_solution(measure=measure, x0=env_replica.layers[0].sound_speed_profile_m_s.sound_speed)
+    opt_time_list += [time.time() - t]
     print(m)
+    nfev_list += [m.nfev]
+    njev_list += [m.njev]
     env_replica.layers[0].sound_speed_profile_m_s.sound_speed = m.x
     inverted_ssp_list += [deepcopy(env_replica.layers[0].sound_speed_profile_m_s)]
     print(f'upper = {upper}; {m.x[0]}; loss0 = {loss0(env_replica.layers[0].sound_speed_profile_m_s.sound_speed, measure)}')
@@ -202,13 +206,14 @@ ax[1].set_ylabel("Depth (m)")
 ax[1].set_ylim([inverted_ssp.z_grid_m[-1], inverted_ssp.z_grid_m[0]])
 ax[1].grid(True)
 plt.show()
-plt.savefig('ex1_ssp_dynamics.eps')
+#plt.savefig('ex1_ssp_dynamics.eps')
 
 ssp_error_list = []
-f, ax = plt.subplots(1, 1, figsize=(7, 2), constrained_layout=True)
+dz = replica_z_grid_m[1] - replica_z_grid_m[0]
+f, ax = plt.subplots(1, 1, figsize=(10, 3.2), constrained_layout=True)
 for i in range(0, len(simulated_ssp_list)):
     d = simulated_ssp_list[i](replica_z_grid_m) - inverted_ssp_list[i](replica_z_grid_m)
-    ssp_error_list += [jnp.linalg.norm(d)]
+    ssp_error_list += [jnp.linalg.norm(jnp.diff(d)/dz) * jnp.sqrt(dz)]
     ax.plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
 ax.set_xlabel('SSP difference (m/s)')
 ax.set_ylabel('Depth (m)')
@@ -216,16 +221,16 @@ ax.set_ylim([replica_z_grid_m[-1], replica_z_grid_m[0]])
 ax.set_xticks(np.arange(0, 5*len(simulated_ssp_list), 10))
 ax.grid(True)
 plt.show()
-plt.savefig('ex1_ssp_error_pw.eps')
+#plt.savefig('ex1_ssp_error_pw.eps')
 
-plt.figure(figsize=(6, 3.2), constrained_layout=True)
+plt.figure(figsize=(10, 3.2), constrained_layout=True)
 plt.plot(range(0, len(ssp_error_list)), ssp_error_list)
 plt.xlabel('Number of iteration')
 plt.xticks(range(0, len(ssp_error_list)))
 plt.ylabel('||error||')
 plt.grid(True)
 plt.show()
-plt.savefig('ex1_ssp_error_norm.eps')
+#plt.savefig('ex1_ssp_error_norm.eps')
 
 plt.figure(figsize=(6, 3.2), constrained_layout=True)
 plt.plot(range(0, len(nfev_list)), nfev_list, label='nfev')
@@ -238,7 +243,7 @@ plt.ylabel('Number of evaluations')
 plt.grid(True)
 plt.legend()
 plt.show()
-plt.savefig('ex1_n_evals.eps')
+#plt.savefig('ex1_n_evals.eps')
 
 plt.figure(figsize=(6, 3.2), constrained_layout=True)
 plt.plot(range(0, len(opt_time_list)), opt_time_list)
@@ -248,7 +253,7 @@ plt.xlim([0, len(opt_time_list)-1])
 plt.ylabel('Time (s)')
 plt.grid(True)
 plt.show()
-plt.savefig('ex1_opt_time.eps')
+#plt.savefig('ex1_opt_time.eps')
 
 env_vis = deepcopy(env_simulated)
 vis_model = uwa_get_model(
@@ -355,4 +360,4 @@ ax[1, 2].grid(True)
 f.colorbar(im, ax=ax[1,:], shrink=0.3, location='bottom')
 
 plt.show()
-plt.savefig('ex1_2d.eps')
+#plt.savefig('ex1_2d.eps')
