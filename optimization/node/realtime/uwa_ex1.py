@@ -25,7 +25,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 src = GaussSourceModel(
-    freq_hz=500.0,
+    freq_hz=200.0,
     depth_m=50.0,
     beam_width_deg=10.0
 )
@@ -50,7 +50,7 @@ env_simulated = UnderwaterEnvironmentModel(
 )
 
 computational_params = ComputationalParams(
-    max_range_m=5000,
+    max_range_m=10000,
     max_depth_m=250,
     x_output_points=5,
     z_output_points=100,
@@ -150,17 +150,17 @@ def get_opt_solution(measure, x0):
 env_replica.layers[0].sound_speed_profile_m_s.sound_speed = replica_z_grid_m*0.0 + 1500.0 + jax.random.uniform(jax.random.PRNGKey(0), (20,))*0.2
 simulated_ssp_list = []
 
-for lower in linspace(1500.0, 1510, 21):
+for lower in linspace(1500.0, 1510, 41):
     env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([1500.0, lower])
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
 
 env_simulated.layers[0].sound_speed_profile_m_s.z_grid_m = jnp.array([0.0, 75, 200])
-for upper in linspace(1500.0, 1510, 21):
+for upper in linspace(1500.0, 1510, 41):
     env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([upper, (lower+1500.0)/2, lower])
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
 
 ms = env_simulated.layers[0].sound_speed_profile_m_s(75.0)
-for middle in linspace(ms, 1510, 10):
+for middle in linspace(ms, 1510, 20):
     env_simulated.layers[0].sound_speed_profile_m_s.sound_speed = jnp.array([upper, middle, lower])
     simulated_ssp_list += [deepcopy(env_simulated.layers[0].sound_speed_profile_m_s)]
 
@@ -169,6 +169,7 @@ nfev_list = []
 njev_list = []
 opt_time_list = []
 ssp_error_list = []
+rel_error_list = []
 dz = replica_z_grid_m[1] - replica_z_grid_m[0]
 for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
     env_simulated.layers[0].sound_speed_profile_m_s = simulated_ssp
@@ -185,8 +186,10 @@ for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
 
     d = simulated_ssp(replica_z_grid_m) - inverted_ssp_list[-1](replica_z_grid_m)
     ssp_error_list += [jnp.linalg.norm(jnp.diff(d) / dz) * jnp.sqrt(dz)]
+    sim_norm = jnp.linalg.norm(jnp.diff(simulated_ssp(replica_z_grid_m)) / dz) * jnp.sqrt(dz)
+    rel_error_list += [ssp_error_list[-1] / sim_norm]
 
-    print(f'Step: {sssp_i}/{len(simulated_ssp_list)}; SSP error = {ssp_error_list[-1]}')
+    print(f'Step: {sssp_i}/{len(simulated_ssp_list)}; SSP rel. error = {rel_error_list[-1]}')
 
 
 f, ax = plt.subplots(2, 1, figsize=(10, 5), constrained_layout=True)
@@ -219,13 +222,6 @@ ax.grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_error_pw.eps')
 
-
-ssp_norm_list = []
-for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
-    d = simulated_ssp(replica_z_grid_m)
-    ssp_norm_list += [jnp.linalg.norm(jnp.diff(d) / dz) * jnp.sqrt(dz)]
-
-
 plt.figure(figsize=(10, 3.2), constrained_layout=True)
 plt.plot(range(0, len(ssp_error_list)), ssp_error_list)
 plt.xlabel('Number of iteration')
@@ -236,12 +232,11 @@ plt.grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_error_norm.eps')
 
-rel_error = np.array(ssp_error_list) / np.array(ssp_norm_list)
 plt.figure(figsize=(10, 3.2), constrained_layout=True)
-plt.plot(range(0, len(rel_error)), rel_error)
+plt.plot(range(0, len(rel_error_list)), rel_error_list)
 plt.xlabel('Number of iteration')
-plt.xticks(range(0, len(rel_error))[::2])
-plt.xlim([0, len(rel_error)-1])
+plt.xticks(range(0, len(rel_error_list))[::2])
+plt.xlim([0, len(rel_error_list)-1])
 plt.ylabel('||rel. error||')
 plt.grid(True)
 plt.show()
