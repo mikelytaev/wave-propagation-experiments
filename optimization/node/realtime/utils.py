@@ -8,10 +8,10 @@ from attr import dataclass
 from jax import numpy as jnp
 from scipy.optimize import minimize
 
-from experiments.optimization.node.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
+from experimental.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
     PiecewiseLinearWaveSpeedModel, ConstWaveSpeedModel
 from experiments.optimization.node.objective_functions import bartlett
-from experiments.optimization.node.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
     ComputationalParams, uwa_get_model
 
 

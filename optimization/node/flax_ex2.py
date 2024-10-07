@@ -1,17 +1,16 @@
 from typing import Sequence
 import jax
-from flax.linen import zeros_init, ones_init
 from jax import random, numpy as jnp, tree_util
 from flax import linen as nn
 import matplotlib.pyplot as plt
-from jax._src.nn.initializers import glorot_normal, glorot_uniform
+from jax._src.nn.initializers import glorot_normal
 from matplotlib.colors import Normalize
 import math as fm
 
-from experiments.optimization.node.helmholtz_jax import AbstractWaveSpeedModel, PiecewiseLinearWaveSpeedModel, \
+from experimental.helmholtz_jax import AbstractWaveSpeedModel, PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel
 from experiments.optimization.node.objective_functions import bartlett
-from experiments.optimization.node.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
     ComputationalParams, uwa_forward_task, uwa_get_model
 
 

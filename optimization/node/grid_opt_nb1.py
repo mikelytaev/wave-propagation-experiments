@@ -5,8 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
-from experiments.optimization.node.grid_optimizer import fourth_order_error_kz, rational_approx_error, _OptTable, \
-    get_optimal_grid
+from experimental.grid_optimizer import fourth_order_error_kz, rational_approx_error, get_optimal_grid
 from propagators._utils import pade_propagator_coefs
 
 

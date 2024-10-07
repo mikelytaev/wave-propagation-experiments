@@ -1,21 +1,14 @@
 import jax.numpy as jnp
-import numpy as np
 import numpyro
-from matplotlib.colors import Normalize
 
-from experiments.optimization.node.helmholtz_jax import LinearSlopeWaveSpeedModel
-from experiments.optimization.node.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.helmholtz_jax import LinearSlopeWaveSpeedModel
+from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task
 from experiments.optimization.node.objective_functions import bartlett
-from uwa.environment import *
 import math as fm
 import jax
-from numpyro.infer.hmc import NUTS
-from numpyro.infer import MCMC, SA, ESS
+from numpyro.infer import MCMC, SA
 import numpyro.distributions as dist
-
-import matplotlib.pyplot as plt
-
 
 src = GaussSourceModel(freq_hz=50, depth_m=100, beam_width_deg=10)
 env = UnderwaterEnvironmentModel(

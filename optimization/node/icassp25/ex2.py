@@ -1,24 +1,17 @@
 import jax.numpy as jnp
-import numpy as np
 from matplotlib.colors import Normalize
 
-from experiments.optimization.node.helmholtz_jax import LinearSlopeWaveSpeedModel, PiecewiseLinearWaveSpeedModel, \
+from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel, RationalHelmholtzPropagator
-from experiments.optimization.node.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task, UnderwaterLayerModel
 from experiments.optimization.node.objective_functions import bartlett
 import math as fm
 import jax
-import jax.random as jr
-from scipy.optimize import minimize, dual_annealing
+from scipy.optimize import minimize
 
 import matplotlib.pyplot as plt
 
-from uwa.field import AcousticPressureField
-
-import optax
-
-import logging
 #logging.basicConfig(level=logging.DEBUG)
 
 

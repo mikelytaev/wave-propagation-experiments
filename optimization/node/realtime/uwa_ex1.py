@@ -5,20 +5,18 @@ import numpy as np
 from jax.experimental.array_api import linspace
 from matplotlib.colors import Normalize
 
-from experiments.optimization.node.helmholtz_jax import LinearSlopeWaveSpeedModel, PiecewiseLinearWaveSpeedModel, \
+from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel, RationalHelmholtzPropagator
-from experiments.optimization.node.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
-    uwa_get_model, uwa_forward_task, UnderwaterLayerModel
+from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+    uwa_get_model, UnderwaterLayerModel
 from experiments.optimization.node.objective_functions import bartlett
 import math as fm
 import jax
-import jax.random as jr
-from scipy.optimize import minimize, dual_annealing
+from scipy.optimize import minimize
 
 import matplotlib.pyplot as plt
 import time
 
-import logging
 #logging.basicConfig(level=logging.DEBUG)
 
 jax.config.update("jax_enable_x64", True)

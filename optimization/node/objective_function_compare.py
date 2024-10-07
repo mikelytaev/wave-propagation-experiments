@@ -1,11 +1,9 @@
 import jax.numpy as jnp
-import numpy as np
 from matplotlib.colors import Normalize
 
-from experiments.optimization.node.helmholtz_jax import LinearSlopeWaveSpeedModel, StaircaseRhoModel
-from experiments.optimization.node.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.helmholtz_jax import LinearSlopeWaveSpeedModel, StaircaseRhoModel
+from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task
-from uwa.environment import *
 import math as fm
 import jax
 

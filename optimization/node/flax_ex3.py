@@ -4,8 +4,6 @@ from jax import random, numpy as jnp
 from flax import linen as nn
 import matplotlib.pyplot as plt
 
-from experiments.optimization.node.helmholtz_jax import AbstractWaveSpeedModel
-
 
 def func(x):
     return -jnp.sin(2*(x - 10)) / (x - 10)

@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 from experiments.optimization.node.expected import expected_value_jacfwd, expected_value_quad
-from experiments.optimization.node.helmholtz_jax import ConstWaveSpeedModel, \
-    LinearSlopeWaveSpeedModel
-from experiments.optimization.node.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+from experimental.helmholtz_jax import LinearSlopeWaveSpeedModel
+from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
     ComputationalParams, uwa_get_model
 
 # import jax
