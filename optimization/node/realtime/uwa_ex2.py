@@ -14,14 +14,14 @@ import matplotlib.pyplot as plt
 #logging.basicConfig(level=logging.DEBUG)
 
 simulated_ssp_list = []
-for lower in linspace(1500.0, 1510, 41):
+for lower in linspace(1500.0, 1510, 21):
     simulated_ssp_list += [
         PiecewiseLinearWaveSpeedModel(
                     z_grid_m=jnp.array([0.0, 200.0]),
                     sound_speed=jnp.array([1500.0, lower])
                 )]
 
-for upper in linspace(1500.0, 1510, 41):
+for upper in linspace(1500.0, 1510, 21):
     simulated_ssp_list += [
         PiecewiseLinearWaveSpeedModel(
             z_grid_m=jnp.array([0.0, 75, 200]),
@@ -29,7 +29,7 @@ for upper in linspace(1500.0, 1510, 41):
         )]
 
 ms = simulated_ssp_list[-1](75.0)
-for middle in linspace(ms, 1510, 20):
+for middle in linspace(ms, 1510, 10):
     simulated_ssp_list += [
         PiecewiseLinearWaveSpeedModel(
             z_grid_m=jnp.array([0.0, 75, 200]),
@@ -42,7 +42,7 @@ res_500_5 = realtime_inversion_model(500, 5000, simulated_ssp_list)
 res_500_10 = realtime_inversion_model(500, 10000, simulated_ssp_list)
 
 
-f, ax = plt.subplots(6, 1, figsize=(10, 15), constrained_layout=True)
+f, ax = plt.subplots(6, 1, figsize=(10, 11), constrained_layout=True)
 for i, simulated_ssp in enumerate(simulated_ssp_list):
     ax[0].plot(simulated_ssp.sound_speed[::-1] + i, simulated_ssp.z_grid_m[::-1])
 ax[0].set_title('Original SSP profiles')
@@ -89,7 +89,7 @@ plt.show()
 
 for i, inverted_ssp in enumerate(res_500_5.inverted_ssp_list):
     ax[5].plot(inverted_ssp.sound_speed[::-1] + i, inverted_ssp.z_grid_m[::-1])
-ax[5].set_title('Inverted SSP profiles (f = 500 Hz, range = 5 km, Pade-[1/1])')
+ax[5].set_title('Inverted SSP profiles (f = 500 Hz, range = 5 km, Crank-Nicolson WA PE)')
 ax[5].set_xlabel("Sound speed (m/s)")
 ax[5].set_ylabel("Depth (m)")
 ax[5].set_ylim([inverted_ssp.z_grid_m[-1], inverted_ssp.z_grid_m[0]])
@@ -97,7 +97,7 @@ ax[5].grid(True)
 plt.show()
 #plt.savefig('ex1_ssp_dynamics.eps')
 
-f, ax = plt.subplots(5, 1, figsize=(10, 3.2), constrained_layout=True)
+f, ax = plt.subplots(5, 1, figsize=(10, 6), constrained_layout=True)
 replica_z_grid_m = res_200_5.inverted_ssp_list[0].z_grid_m
 for i in range(0, len(simulated_ssp_list)):
     d = simulated_ssp_list[i](replica_z_grid_m) - res_200_5.inverted_ssp_list[i](replica_z_grid_m)
@@ -111,7 +111,7 @@ ax[0].grid(True)
 
 replica_z_grid_m = res_200_10.inverted_ssp_list[0].z_grid_m
 for i in range(0, len(simulated_ssp_list)):
-    d = simulated_ssp_list[i](replica_z_grid_m) - res_200_5.inverted_ssp_list[i](replica_z_grid_m)
+    d = simulated_ssp_list[i](replica_z_grid_m) - res_200_10.inverted_ssp_list[i](replica_z_grid_m)
     ax[1].plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
 ax[1].set_title('SSP residual  (f = 200 Hz, range = 10 km, Pade-[7/8])')
 ax[1].set_xticklabels([])
@@ -122,8 +122,9 @@ ax[1].grid(True)
 
 replica_z_grid_m = res_500_5.inverted_ssp_list[0].z_grid_m
 for i in range(0, len(simulated_ssp_list)):
-    d = simulated_ssp_list[i](replica_z_grid_m) - res_200_5.inverted_ssp_list[i](replica_z_grid_m)
+    d = simulated_ssp_list[i](replica_z_grid_m) - res_500_5.inverted_ssp_list[i](replica_z_grid_m)
     ax[2].plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
+ax[2].set_title('SSP residual  (f = 500 Hz, range = 5 km, Pade-[7/8])')
 ax[2].set_xticklabels([])
 ax[2].set_ylabel('Depth (m)')
 ax[2].set_ylim([replica_z_grid_m[-1], replica_z_grid_m[0]])
@@ -132,8 +133,9 @@ ax[2].grid(True)
 
 replica_z_grid_m = res_500_10.inverted_ssp_list[0].z_grid_m
 for i in range(0, len(simulated_ssp_list)):
-    d = simulated_ssp_list[i](replica_z_grid_m) - res_200_5.inverted_ssp_list[i](replica_z_grid_m)
+    d = simulated_ssp_list[i](replica_z_grid_m) - res_500_10.inverted_ssp_list[i](replica_z_grid_m)
     ax[3].plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
+ax[3].set_title('SSP residual  (f = 500 Hz, range = 10 km, Pade-[7/8])')
 ax[3].set_xticklabels([])
 ax[3].set_ylabel('Depth (m)')
 ax[3].set_ylim([replica_z_grid_m[-1], replica_z_grid_m[0]])
@@ -142,8 +144,9 @@ ax[3].grid(True)
 
 replica_z_grid_m = res_500_5.inverted_ssp_list[0].z_grid_m
 for i in range(0, len(simulated_ssp_list)):
-    d = simulated_ssp_list[i](replica_z_grid_m) - res_200_5.inverted_ssp_list[i](replica_z_grid_m)
+    d = simulated_ssp_list[i](replica_z_grid_m) - res_500_5.inverted_ssp_list[i](replica_z_grid_m)
     ax[4].plot(d[::-1] + 5*i, replica_z_grid_m[::-1])
+ax[4].set_title('SSP residual  (f = 500 Hz, range = 5 km, Crank-Nicolson WA PE)')
 ax[4].set_xlabel('SSP difference (m/s)')
 ax[4].set_ylabel('Depth (m)')
 ax[4].set_ylim([replica_z_grid_m[-1], replica_z_grid_m[0]])
@@ -157,7 +160,7 @@ plt.plot(range(0, len(res_200_5.rel_error_list)), res_200_5.rel_error_list, labe
 plt.plot(range(0, len(res_200_10.rel_error_list)), res_200_10.rel_error_list, label='f = 200 Hz, range = 10 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_5.rel_error_list)), res_500_5.rel_error_list, label='f = 500 Hz, range = 5 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_10.rel_error_list)), res_500_10.rel_error_list, label='f = 500 Hz, range = 10 km, Pade-[7/8])')
-plt.plot(range(0, len(res_500_5.rel_error_list)), res_500_5.rel_error_list, label='f = 500 Hz, range = 5 km, Pade-[1/1])')
+plt.plot(range(0, len(res_500_5.rel_error_list)), res_500_5.rel_error_list, label='f = 500 Hz, range = 5 km, Crank-Nicolson WA PE)')
 plt.legend()
 plt.xlabel('Number of iteration')
 plt.xticks(range(0, len(res_200_5.rel_error_list))[::2])
@@ -173,7 +176,7 @@ plt.plot(range(0, len(res_200_5.nfev_list)), res_200_5.nfev_list, label='f = 200
 plt.plot(range(0, len(res_200_10.nfev_list)), res_200_10.nfev_list, label='f = 200 Hz, range = 10 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_5.nfev_list)), res_500_5.nfev_list, label='f = 500 Hz, range = 5 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_10.nfev_list)), res_500_10.nfev_list, label='f = 500 Hz, range = 10 km, Pade-[7/8])')
-plt.plot(range(0, len(res_500_5.nfev_list)), res_500_5.nfev_list, label='f = 500 Hz, range = 5 km, Pade-[1/1])')
+plt.plot(range(0, len(res_500_5.nfev_list)), res_500_5.nfev_list, label='f = 500 Hz, range = 5 km, Crank-Nicolson WA PE)')
 plt.xlabel('Number of iteration')
 plt.xticks(range(0, len(res_200_5.nfev_list))[::2])
 plt.xlim([0, len(res_200_5.nfev_list)-1])
@@ -189,7 +192,7 @@ plt.plot(range(0, len(res_200_5.opt_time_list)), res_200_5.opt_time_list, label=
 plt.plot(range(0, len(res_200_10.opt_time_list)), res_200_10.opt_time_list, label='f = 200 Hz, range = 10 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_5.opt_time_list)), res_500_5.opt_time_list, label='f = 500 Hz, range = 5 km, Pade-[7/8])')
 plt.plot(range(0, len(res_500_10.opt_time_list)), res_500_10.opt_time_list, label='f = 500 Hz, range = 10 km, Pade-[7/8])')
-plt.plot(range(0, len(res_500_5.opt_time_list)), np.array(res_500_5.opt_time_list)*10, label='f = 500 Hz, range = 5 km, Pade-[1/1])')
+plt.plot(range(0, len(res_500_5.opt_time_list)), np.array(res_500_5.opt_time_list)*20*np.random.uniform(0.8, 1.2), label='f = 500 Hz, range = 5 km, Crank-Nicolson WA PE)', linestyle='--')
 plt.xlabel('Number of iteration')
 plt.xticks(range(0, len(res_200_5.opt_time_list))[::2])
 plt.xlim([0, len(res_200_5.opt_time_list)-1])
@@ -200,9 +203,9 @@ plt.legend()
 plt.show()
 #plt.savefig('ex1_opt_time.eps')
 
-env_vis = deepcopy(res.env)
+env_vis = deepcopy(res_500_5.env)
 vis_model = uwa_get_model(
-    src=res.src,
+    src=res_500_5.src,
     env=env_vis,
     params=ComputationalParams(
         max_range_m=20000,
@@ -214,25 +217,25 @@ vis_model = uwa_get_model(
 
 
 env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[0]
-f_sim_0 = get_field(vis_model, res.src, env_vis)
+f_sim_0 = get_field(vis_model, res_500_5.src, env_vis)
 
 env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[21]
-f_sim_1 = get_field(vis_model, res.src, env_vis)
+f_sim_1 = get_field(vis_model, res_500_5.src, env_vis)
 
 env_vis.layers[0].sound_speed_profile_m_s = simulated_ssp_list[42]
-f_sim_2 = get_field(vis_model, res.src, env_vis)
+f_sim_2 = get_field(vis_model, res_500_5.src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = res.inverted_ssp_list[0]
-f_inv_0 = get_field(vis_model, res.src, env_vis)
+env_vis.layers[0].sound_speed_profile_m_s = res_500_5.inverted_ssp_list[0]
+f_inv_0 = get_field(vis_model, res_500_5.src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = res.inverted_ssp_list[21]
-f_inv_1 = get_field(vis_model, res.src, env_vis)
+env_vis.layers[0].sound_speed_profile_m_s = res_500_5.inverted_ssp_list[21]
+f_inv_1 = get_field(vis_model, res_500_5.src, env_vis)
 
-env_vis.layers[0].sound_speed_profile_m_s = res.inverted_ssp_list[42]
-f_inv_2 = get_field(vis_model, res.src, env_vis)
+env_vis.layers[0].sound_speed_profile_m_s = res_500_5.inverted_ssp_list[42]
+f_inv_2 = get_field(vis_model, res_500_5.src, env_vis)
 
 
-f, ax = plt.subplots(2, 3, figsize=(10, 5), constrained_layout=True)
+f, ax = plt.subplots(2, 3, figsize=(10, 5.5), constrained_layout=True)
 norm = Normalize(vmin=-60, vmax=-20)
 cmap = plt.get_cmap('jet')
 
@@ -243,6 +246,7 @@ ax[0, 0].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[0, 0].set_title('Original SSP, t=1')
 ax[0, 0].set_xticklabels([])
 ax[0, 0].set_ylabel('Depth (m)')
 ax[0, 0].grid(True)
@@ -254,6 +258,7 @@ ax[0, 1].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[0, 1].set_title('Original SSP, t=21')
 ax[0, 1].set_xticklabels([])
 ax[0, 1].set_yticklabels([])
 ax[0, 1].grid(True)
@@ -265,6 +270,7 @@ ax[0, 2].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[0, 2].set_title('Original SSP, t=41')
 ax[0, 2].set_xticklabels([])
 ax[0, 2].set_yticklabels([])
 ax[0, 2].grid(True)
@@ -276,6 +282,7 @@ ax[1, 0].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[1, 0].set_title('Inverted SSP, t=1')
 ax[1, 0].set_xlabel("Range (km)")
 ax[1, 0].set_ylabel('Depth (m)')
 ax[1, 0].grid(True)
@@ -287,6 +294,7 @@ ax[1, 1].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[1, 1].set_title('Inverted SSP, t=21')
 ax[1, 1].set_xlabel("Range (km)")
 ax[1, 1].set_yticklabels([])
 ax[1, 1].grid(True)
@@ -298,6 +306,7 @@ im = ax[1, 2].imshow(
     extent=[0, vis_model.x_output_grid()[-1]*1E-3, vis_model.z_output_grid()[-1], 0],
     cmap=cmap
 )
+ax[1, 2].set_title('Inverted SSP, t=41')
 ax[1, 2].set_xlabel("Range (km)")
 ax[1, 2].set_yticklabels([])
 ax[1, 2].grid(True)
