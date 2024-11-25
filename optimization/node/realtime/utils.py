@@ -28,6 +28,7 @@ def get_field(model: RationalHelmholtzPropagator, src: GaussSourceModel, env: Un
 @dataclass
 class RealtimeInversionModelResult:
     inverted_ssp_list: List[AbstractWaveSpeedModel]
+    abs_error_list: List[float]
     rel_error_list: List[float]
     opt_time_list: List[float]
     nfev_list: List[float]
@@ -36,7 +37,7 @@ class RealtimeInversionModelResult:
     src: GaussSourceModel
 
 
-def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> RealtimeInversionModelResult:
+def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list, snr=None, gamma=1.0, arrays_num=1) -> RealtimeInversionModelResult:
     src = GaussSourceModel(
         freq_hz=freq_hz,
         depth_m=50.0,
@@ -62,12 +63,16 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> Rea
         ]
     )
 
+    max_depth_m = 250
     computational_params = ComputationalParams(
         max_range_m=range_to_vla_m,
-        max_depth_m=250,
-        x_output_points=5,
-        z_output_points=100,
+        max_depth_m=max_depth_m,
+        dx_m=range_to_vla_m/5,
+        dz_m=max_depth_m/100,
     )
+
+    measure_points_depth = jnp.array([5, 10, 20, 30, 40, 50, 60, 70])
+    measure_points_range = -jnp.arange(1, arrays_num+1, 1)
 
     simulated_model = uwa_get_model(
         src=src,
@@ -89,10 +94,11 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> Rea
     model_points_num = len(env_replica.layers[0].sound_speed_profile_m_s.z_grid_m)
 
     def loss0(sound_speed_vals, measure):
-        etalon_loss0_v = 1 / bartlett(measure[2:390:10], measure[2:390:10])
+        etalon_loss0_v = 1 / bartlett(measure[measure_points_depth], measure[measure_points_depth])
         env_replica.layers[0].sound_speed_profile_m_s.sound_speed = sound_speed_vals
-        f = get_field(training_model, src, env_replica)[-1, :]
-        return 1 / bartlett(measure[2:390:10], f[2:390:10]) - etalon_loss0_v
+        f = get_field(training_model, src, env_replica)[measure_points_range, :]
+        f = jnp.ravel(f)
+        return 1 / bartlett(measure[measure_points_depth], f[measure_points_depth]) - etalon_loss0_v
 
 
     def loss1(sound_speed_vals):
@@ -101,7 +107,7 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> Rea
 
     @jax.jit
     def loss_func(sound_speed_vals, measure):
-         return loss0(sound_speed_vals, measure) + loss1(sound_speed_vals)
+         return loss0(sound_speed_vals, measure) + gamma*loss1(sound_speed_vals)
 
 
     @jax.jit
@@ -129,14 +135,26 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> Rea
     nfev_list = []
     njev_list = []
     opt_time_list = []
+    abs_error_list = []
     rel_error_list = []
     dz = replica_z_grid_m[1] - replica_z_grid_m[0]
     for sssp_i, simulated_ssp in enumerate(simulated_ssp_list):
         env_simulated.layers[0].sound_speed_profile_m_s = simulated_ssp
-        measure = get_field(simulated_model, src, env_simulated)[-1, :]
+        measure = get_field(simulated_model, src, env_simulated)[measure_points_range, :]
+        measure = jnp.ravel(measure)
+
+        if snr:
+            signal_level = jnp.mean(abs(measure)**2)
+            noise_var = signal_level / (10 ** (snr / 10))
+            noise_sigma_r = jnp.sqrt(noise_var / 2)
+            r_t = jax.random.normal(jax.random.PRNGKey(1703), (len(measure), 2)) * noise_sigma_r
+            noise = r_t[:, 0] + 1j*r_t[:, 1]
+            measure += noise
 
         t = time.time()
-        m = get_opt_solution(measure=measure, x0=env_replica.layers[0].sound_speed_profile_m_s.sound_speed)
+        x0 = env_replica.layers[0].sound_speed_profile_m_s.sound_speed
+        x0 += simulated_ssp_list[0](0) - x0[0]
+        m = get_opt_solution(measure=measure, x0=x0)
         opt_time_list += [time.time() - t]
         print(m)
         nfev_list += [m.nfev]
@@ -146,13 +164,15 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list) -> Rea
 
         d = simulated_ssp(replica_z_grid_m) - inverted_ssp_list[-1](replica_z_grid_m)
         ssp_error = jnp.linalg.norm(jnp.diff(d) / dz) * jnp.sqrt(dz)
+        abs_error_list += [ssp_error]
         sim_norm = jnp.linalg.norm(jnp.diff(simulated_ssp(replica_z_grid_m)) / dz) * jnp.sqrt(dz)
         rel_error_list += [ssp_error / sim_norm]
 
-        print(f'Step: {sssp_i}/{len(simulated_ssp_list)}; SSP rel. error = {rel_error_list[-1]}')
+        print(f'Step: {sssp_i}/{len(simulated_ssp_list)}; SSP abs. error = {abs_error_list[-1]:.2f}; SSP rel. error = {rel_error_list[-1]:.2f}')
 
     return RealtimeInversionModelResult(
         inverted_ssp_list=inverted_ssp_list,
+        abs_error_list=abs_error_list,
         rel_error_list=rel_error_list,
         opt_time_list=opt_time_list,
         nfev_list=nfev_list,

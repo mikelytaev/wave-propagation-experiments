@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 
 
 def func(x):
-    return x*jnp.sin(2*x) + jnp.cos(x)
+    x *= 100
+    return 100*jnp.sin(x*0.1)
+    #return x*jnp.sin(2*x) + jnp.cos(x)
 
 
 class ExplicitMLP(nn.Module):
@@ -24,14 +26,12 @@ class ExplicitMLP(nn.Module):
     return x
 
 key1, key2 = random.split(random.key(0), 2)
-x = random.uniform(key1, (3,1))
 
-model = ExplicitMLP(features=[30]*5 + [1])
-params = model.init(key2, x)
-y = model.apply(params, x)
+model = ExplicitMLP(features=[40]*3 + [1])
+params = model.init(key2, jnp.ones((1, 1)))
 
 
-x_learn_grid = jnp.linspace(-5, 5, 200).reshape((200, 1))
+x_learn_grid = jnp.linspace(0, 1, 200).reshape((200, 1))
 
 
 def operator(f_grid):
@@ -41,11 +41,11 @@ def operator(f_grid):
 def loss(params):
     m_v = model.apply(params, x_learn_grid)
     f_v = func(x_learn_grid)
-    return jnp.linalg.norm(operator(m_v) - operator(f_v))
+    return jnp.linalg.norm((m_v) - (f_v))
 
 
 import optax
-learning_rate = 0.001
+learning_rate = 0.01
 tx = optax.adam(learning_rate=learning_rate)
 
 opt_state = tx.init(params)
@@ -59,7 +59,7 @@ for i in range(3001):
     print('Loss step {}: '.format(i), loss_val)
 
 
-x_test_grid = jnp.linspace(-7, 7, 1000).reshape((1000, 1))
+x_test_grid = jnp.linspace(0, 1, 1000).reshape((1000, 1))
 plt.figure(figsize=(6, 3.2))
 plt.plot(x_test_grid, model.apply(params, x_test_grid))
 plt.plot(x_test_grid, func(x_test_grid))

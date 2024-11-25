@@ -49,9 +49,9 @@ def get_log_field(freq_hz, antenna_height_m, duct_height_m, max_range_m, max_hei
     return field
 
 
-def do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height_m, max_range_m, max_height_m, n=10):
+def do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_sigma_m, max_range_m, max_height_m, n=10):
     x, w = roots_hermite(n)
-    xs = fm.sqrt(2) * duct_mean_height_m * x + duct_expected_height_m
+    xs = fm.sqrt(2) * duct_sigma_m * x + duct_expected_height_m
     w_p = w[xs > 0]
     xs_p = xs[xs > 0]
     f_x = [get_log_field(freq_hz, antenna_height_m, h, max_range_m, max_height_m) for h in xs_p]
@@ -81,15 +81,15 @@ class Result:
     title: str
 
 
-def do_model(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height_m, max_range_m, max_height_m, title):
+def do_model(freq_hz, antenna_height_m, duct_expected_height_m, duct_sigma_m, max_range_m, max_height_m, title):
     print(title)
     _, _, _, field_sigma_prev = (
-        do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height_m, max_range_m, max_height_m, 3))
+        do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_sigma_m, max_range_m, max_height_m, 3))
     for i in range(2, 10):
         n = 2**i + 1
         print(n)
         mid_field, expected_field, error_field, field_sigma = (
-            do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_mean_height_m, max_range_m, max_height_m, n))
+            do_model_n(freq_hz, antenna_height_m, duct_expected_height_m, duct_sigma_m, max_range_m, max_height_m, n))
         relerr = np.linalg.norm(field_sigma_prev.field[10:, -1] - field_sigma.field[10:, -1]) / np.linalg.norm(field_sigma_prev.field[10:, -1])
         print(f"relerr = {relerr}")
         if relerr < 0.1:
@@ -174,7 +174,7 @@ def show(model_res: List[Result]):
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=0.5,
+#     duct_sigma_m=0.5,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title="σ = 0.5 m"
@@ -185,7 +185,7 @@ def show(model_res: List[Result]):
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=1,
+#     duct_sigma_m=1,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title="σ = 1 m"
@@ -196,7 +196,7 @@ def show(model_res: List[Result]):
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title="σ = 2 m"
@@ -207,7 +207,7 @@ def show(model_res: List[Result]):
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=3,
+#     duct_sigma_m=3,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title="σ = 3 m"
@@ -218,7 +218,7 @@ def show(model_res: List[Result]):
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=4,
+#     duct_sigma_m=4,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title="σ = 4 m"
@@ -235,7 +235,7 @@ r = do_model(
     freq_hz=300E6,
     antenna_height_m=10,
     duct_expected_height_m=20,
-    duct_mean_height_m=2,
+    duct_sigma_m=2,
     max_range_m=300E3,
     max_height_m=300,
     title='f = 300 MHz'
@@ -246,7 +246,7 @@ r = do_model(
     freq_hz=1E9,
     antenna_height_m=10,
     duct_expected_height_m=20,
-    duct_mean_height_m=2,
+    duct_sigma_m=2,
     max_range_m=300E3,
     max_height_m=100,
     title='f = 1 GHz'
@@ -257,7 +257,7 @@ r = do_model(
     freq_hz=3E9,
     antenna_height_m=10,
     duct_expected_height_m=20,
-    duct_mean_height_m=2,
+    duct_sigma_m=2,
     max_range_m=300E3,
     max_height_m=100,
     title='f = 3 GHz'
@@ -268,7 +268,7 @@ r = do_model(
     freq_hz=10E9,
     antenna_height_m=10,
     duct_expected_height_m=20,
-    duct_mean_height_m=2,
+    duct_sigma_m=2,
     max_range_m=300E3,
     max_height_m=100,
     title='f = 10 GHz'
@@ -284,7 +284,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=10,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Duct h = 10 m'
@@ -295,7 +295,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Duct h = 20 m'
@@ -306,7 +306,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=10,
 #     duct_expected_height_m=30,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Duct h = 30 m'
@@ -322,7 +322,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=5,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Ant. h = 5 m'
@@ -333,7 +333,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=30,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Ant. h = 30 m'
@@ -344,7 +344,7 @@ plt.savefig('2.eps')
 #     freq_hz=10E9,
 #     antenna_height_m=60,
 #     duct_expected_height_m=20,
-#     duct_mean_height_m=2,
+#     duct_sigma_m=2,
 #     max_range_m=300E3,
 #     max_height_m=100,
 #     title='Ant. h = 60 m'
