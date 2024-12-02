@@ -51,7 +51,7 @@ errors_freq1ghz = get_rel_errors(profiles, inverted_profiles_freq1ghz, z_grid)
 errors_freq3ghz = get_rel_errors(profiles, inverted_profiles_freq3ghz, z_grid)
 errors_freq5ghz = get_rel_errors(profiles, inverted_profiles_freq5ghz, z_grid)
 
-plt.figure(figsize=(6, 3.2))
+plt.figure(figsize=(6, 2.8))
 plt.xlabel("Time step number")
 plt.ylabel("Rel. error")
 plt.plot(errors_freq500mgh, label='500 MHz')

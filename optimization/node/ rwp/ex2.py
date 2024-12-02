@@ -14,7 +14,7 @@ errors_snr30 = get_rel_errors(profiles, inverted_profiles_snr30, z_grid)
 errors_snr40 = get_rel_errors(profiles, inverted_profiles_snr40, z_grid)
 errors_snr50 = get_rel_errors(profiles, inverted_profiles_snr50, z_grid)
 
-plt.figure(figsize=(6, 3.2))
+plt.figure(figsize=(6, 2.8))
 plt.xlabel("Time step number")
 plt.ylabel("Rel. error")
 plt.plot(errors_snr10_2, label='SNR = 10 dB')

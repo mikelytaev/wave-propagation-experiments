@@ -14,4 +14,4 @@ def bartlett(measure: jax.Array, replica: jax.Array) -> jax.Array:
 def abs_bartlett(measure: jax.Array, replica: jax.Array) -> jax.Array:
     if measure.shape != replica.shape:
         raise ValueError(f'measure and replica must have the same shape {measure.shape} != {replica.shape}')
-    return jnp.linalg.norm(measure)**2 - (jnp.dot(abs(measure), abs(replica)) / jnp.linalg.norm(measure))**2
+    return 1/(jnp.linalg.norm(measure)**2 - ((jnp.dot(abs(measure.conj()), abs(replica))) / jnp.linalg.norm(replica))**2)

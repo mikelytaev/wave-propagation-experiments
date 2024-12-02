@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 src = GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 env = TroposphereModel(
-    N_profile=EvaporationDuctModel(height_m=20, truncate_height_m=200)
+    #N_profile=EvaporationDuctModel(height_m=20, truncate_height_m=200)
 )
 params = ComputationalParams(
     max_range_m=50000,
@@ -26,7 +26,7 @@ field = model.compute(src.aperture(model.z_computational_grid()))
 plt.figure(figsize=(6, 3.2))
 plt.imshow(
     20*jnp.log10(jnp.abs(field[:,::-1]+1e-16)).T,
-    norm=Normalize(vmin=-70, vmax=-20),
+    norm=Normalize(vmin=-70, vmax=-10),
     aspect='auto',
     extent=[0, model.x_output_grid()[-1], 0, model.z_output_grid()[-1]],
     cmap=plt.get_cmap('jet')

@@ -8,7 +8,7 @@ from experimental.helmholtz_jax import RationalHelmholtzPropagator
 from experimental.rwp_jax import GaussSourceModel, TroposphereModel, ComputationalParams, AbstractNProfileModel, \
     create_rwp_model, EvaporationDuctModel, PiecewiseLinearNProfileModel
 import jax.numpy as jnp
-from experiments.optimization.node.objective_functions import bartlett
+from experiments.optimization.node.objective_functions import bartlett, abs_bartlett
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 
@@ -105,7 +105,7 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
             x0=inverted_profiles[-1](z_grid)[1::],
             jac=jac,
             options={
-                'maxfun': 250,
+                'maxfun': 150,
             },
             #callback=lambda xk: print(
             #    f'{pwl_loss0(xk, z_grid, model, measure)} {gamma * pwl_loss1(xk)}'),
@@ -114,6 +114,20 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
         nfev_list += [m.nfev]
         inverted_profiles += [PiecewiseLinearNProfileModel(z_grid, jnp.concat((jnp.array([10.0]), m.x)))]
         print(f'Step: {ind}/{len(true_profiles)}')
+
+    t = time.time()
+    loss(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    fwd_time = time.time() - t
+
+    t = time.time()
+    jac(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    jac_time = time.time() - t
+
+    t = time.time()
+    jax.value_and_grad(loss)(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    vg_time = time.time() - t
+
+    print(f'fwd_time: {fwd_time} s; jac_time: {jac_time} s; vg_time: {vg_time}')
 
     return inverted_profiles, inversion_time, nfev_list
 
@@ -124,6 +138,7 @@ def get_rel_errors(orig_profiles: List[AbstractNProfileModel], inverted_profiles
         res += [
             jnp.linalg.norm((orig_profiles[ind](z_grid)) - (inverted_profiles[ind](z_grid))) / jnp.linalg.norm(
                 (orig_profiles[ind](z_grid)))]
+    print_mean_error(res)
     return res
 
 
@@ -151,3 +166,8 @@ def plot_field_2d(model: RWPModel, N_profile: AbstractNProfileModel):
     plt.grid(True)
     plt.xlabel('Range (km)')
     plt.show()
+
+def print_mean_error(errors):
+    m = jnp.mean(jnp.array(errors))
+    s = jnp.std(jnp.array(errors))
+    print(f'{m}±{s}')

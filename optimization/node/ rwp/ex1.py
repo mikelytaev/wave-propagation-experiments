@@ -20,7 +20,7 @@ inv_model.env.N_profile = inverted_profiles[35]
 plt.plot(inv_model.env.M_profile(z_grid), z_grid)
 plt.show()
 
-f, ax = plt.subplots(2, 1, figsize=(10, 4), constrained_layout=True)
+f, ax = plt.subplots(2, 1, figsize=(6, 3.2), constrained_layout=True)
 for i, true_profile in enumerate(profiles):
     inv_model.env.N_profile = true_profile
     ax[0].plot(inv_model.env.M_profile(z_grid) + 5*i, z_grid)
@@ -42,21 +42,25 @@ ax[1].set_ylim([z_grid[0], z_grid[-1]])
 ax[1].grid(True)
 plt.show()
 
-f, ax = plt.subplots(1, 4, figsize=(10, 3.2), constrained_layout=True)
-inds = [1, 10, 25, 35]
+f, ax = plt.subplots(1, 4, figsize=(6, 3.2), constrained_layout=True)
+inds = [10, 20, 30, 40]
 ax[0].set_ylabel("Height (m)")
 for i in range(4):
     ax[i].set_title(f't = {inds[i]}')
-    inv_model.env.N_profile = profiles[inds[i]]
+    inv_model.env.N_profile = profiles[inds[i]-1]
     ax[i].plot(inv_model.env.M_profile(z_grid), z_grid, color='blue')
-    inv_model.env.N_profile = inverted_profiles[inds[i]]
+    inv_model.env.N_profile = inverted_profiles[inds[i]-1]
     ax[i].plot(inv_model.env.M_profile(z_grid), z_grid, color='red')
+    ax[i].set_xlim([330, 358])
     ax[i].set_ylim([z_grid[0], z_grid[-1]])
-    ax[i].set_xlabel("M-profile (M units)")
+    ax[i].set_xlabel("M-profile")
     ax[i].grid(True)
+for i in range(1, 4):
+    ax[i].set_yticklabels([])
 legend_elements = [Line2D([0], [0], color='blue', lw=1, label='True profile'),
                    Line2D([0], [0], color='red', lw=1, label='Inverted profile')]
 f.legend(handles=legend_elements, loc='lower center', bbox_to_anchor=(0.5, -0.00), ncol=2)
+f.tight_layout()
 plt.show()
 
 plot_rel_error(profiles, inverted_profiles, z_grid)
@@ -67,7 +71,7 @@ vis_model = RWPModel(params=ComputationalParams(
         dx_m=100,
         dz_m=0.5
     ))
-f, ax = plt.subplots(1, 3, figsize=(10, 2.5), constrained_layout=True)
+f, ax = plt.subplots(1, 3, figsize=(10, 2.3), constrained_layout=True)
 f1 = vis_model.calc_field(profiles[10])
 extent = (vis_model.fwd_model.x_output_grid()[0]*1e-3, vis_model.fwd_model.x_output_grid()[-1]*1e-3,
           vis_model.fwd_model.z_output_grid()[0], vis_model.fwd_model.z_output_grid()[-1])
