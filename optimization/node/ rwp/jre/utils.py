@@ -68,7 +68,7 @@ def hvp(f, primals, tangents):
 
 
 def pwl_operator(z_grid: jnp.ndarray, vals: jnp.ndarray, model: RWPModel):
-    return model.apply_N_profile(PiecewiseLinearNProfileModel(z_grid, jnp.concat((jnp.array([10.0]), vals))))
+    return model.apply_N_profile(PiecewiseLinearNProfileModel(z_grid, jnp.concat((vals, jnp.array([0.0])))))
 
 
 def pwl_loss0(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure):
@@ -77,7 +77,7 @@ def pwl_loss0(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure):
 
 
 def pwl_loss1(vals: jnp.ndarray):
-    return (jnp.linalg.norm(jnp.diff(jnp.concat((jnp.array([10.0]), vals)))))**2
+    return (jnp.linalg.norm(jnp.diff(jnp.concat((vals, jnp.array([0.0]))))))**2
 
 
 def loss(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure, gamma):
@@ -102,7 +102,7 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
             method='L-BFGS-B',
             fun=loss,
             args=(z_grid, model, measure, gamma),
-            x0=inverted_profiles[-1](z_grid)[1::],
+            x0=inverted_profiles[-1](z_grid)[:-1:],
             jac=jac,
             options={
                 'maxfun': 150,
@@ -112,19 +112,19 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
         )
         inversion_time += [time.time() - t]
         nfev_list += [m.nfev]
-        inverted_profiles += [PiecewiseLinearNProfileModel(z_grid, jnp.concat((jnp.array([10.0]), m.x)))]
+        inverted_profiles += [PiecewiseLinearNProfileModel(z_grid, jnp.concat((m.x, jnp.array([0.0]))))]
         print(f'Step: {ind}/{len(true_profiles)}')
 
     t = time.time()
-    loss(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    loss(inverted_profiles[1](z_grid)[:-1:], z_grid, model, measure, gamma)
     fwd_time = time.time() - t
 
     t = time.time()
-    jac(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    jac(inverted_profiles[1](z_grid)[:-1:], z_grid, model, measure, gamma)
     jac_time = time.time() - t
 
     t = time.time()
-    jax.value_and_grad(loss)(inverted_profiles[1](z_grid)[1::], z_grid, model, measure, gamma)
+    jax.value_and_grad(loss)(inverted_profiles[1](z_grid)[:-1:], z_grid, model, measure, gamma)
     vg_time = time.time() - t
 
     print(f'fwd_time: {fwd_time} s; jac_time: {jac_time} s; vg_time: {vg_time}')
@@ -137,7 +137,7 @@ def get_rel_errors(orig_profiles: List[AbstractNProfileModel], inverted_profiles
     for ind in range(len(orig_profiles)):
         res += [
             jnp.linalg.norm((orig_profiles[ind](z_grid)) - (inverted_profiles[ind](z_grid))) / jnp.linalg.norm(
-                (orig_profiles[ind](z_grid)))]
+                (orig_profiles[ind](z_grid)+300))]
     print_mean_error(res)
     return res
 

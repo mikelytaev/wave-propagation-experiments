@@ -12,7 +12,7 @@ jax.config.update("jax_enable_x64", True)
 
 
 
-inverted_profiles, inversion_time, nfev_list = realtime(inv_model, profiles, gamma=1e-3)
+inverted_profiles, inversion_time, nfev_list = realtime(inv_model, profiles, gamma=5e-4)
 
 inv_model.env.N_profile = profiles[35]
 plt.plot(inv_model.env.M_profile(z_grid), z_grid)
@@ -75,15 +75,15 @@ f, ax = plt.subplots(1, 3, figsize=(10, 2.3), constrained_layout=True)
 f1 = vis_model.calc_field(profiles[10])
 extent = (vis_model.fwd_model.x_output_grid()[0]*1e-3, vis_model.fwd_model.x_output_grid()[-1]*1e-3,
           vis_model.fwd_model.z_output_grid()[0], vis_model.fwd_model.z_output_grid()[-1])
-norm = Normalize(-60, -10)
+norm = Normalize(-70, -10)
 ax[0].set_title("Original M-profile (t=10)")
 ax[0].imshow(20*jnp.log10(jnp.abs(f1+1e-16)).T[::-1,:], extent=extent, aspect='auto', norm=norm, cmap=plt.get_cmap('jet'))
 ax[0].grid(True)
 ax[0].set_xlabel('Range (km)')
-ax[0].set_ylabel('Height (km)')
+ax[0].set_ylabel('Height (m)')
 
 f1_i = vis_model.calc_field(inverted_profiles[10])
-norm = Normalize(-60, -10)
+norm = Normalize(-70, -10)
 ax[1].set_title("Inverted M-profile (t=10)")
 ax[1].imshow(20*jnp.log10(jnp.abs(f1_i+1e-16)).T[::-1,:], extent=extent, aspect='auto', norm=norm, cmap=plt.get_cmap('jet'))
 ax[1].grid(True)
@@ -91,7 +91,7 @@ ax[1].set_xlabel('Range (km)')
 ax[1].set_yticklabels([])
 
 f2 = vis_model.calc_field(EmptyNProfileModel())
-norm = Normalize(-60, -10)
+norm = Normalize(-70, -10)
 ax[2].set_title("Standard atmosphere")
 im = ax[2].imshow(20*jnp.log10(jnp.abs(f2+1e-16)).T[::-1,:], extent=extent, aspect='auto', norm=norm, cmap=plt.get_cmap('jet'))
 ax[2].grid(True)
