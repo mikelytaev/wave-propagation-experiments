@@ -7,7 +7,7 @@ from matplotlib.colors import Normalize
 
 from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel
 from experiments.optimization.node.realtime.utils import get_field, realtime_inversion_model
-from experimental.uwa_jax import ComputationalParams, uwa_get_model
+from experimental.uwa_jax import UWAComputationalParams, uwa_get_model
 
 import matplotlib.pyplot as plt
 

@@ -1,6 +1,6 @@
 import logging
 
-from experimental.rwp_jax import GaussSourceModel, TroposphereModel, ComputationalParams, create_rwp_model, \
+from experimental.rwp_jax import RWPGaussSourceModel, TroposphereModel, RWPComputationalParams, create_rwp_model, \
     EvaporationDuctModel
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
@@ -10,11 +10,11 @@ import jax.numpy as jnp
 jax.config.update("jax_enable_x64", True)
 logging.basicConfig(level=logging.DEBUG)
 
-src = GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+src = RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 env = TroposphereModel(
     #N_profile=EvaporationDuctModel(height_m=20, truncate_height_m=200)
 )
-params = ComputationalParams(
+params = RWPComputationalParams(
     max_range_m=50000,
     max_height_m=250,
     dx_m=100,

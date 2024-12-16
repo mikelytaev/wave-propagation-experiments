@@ -5,7 +5,7 @@ import jax
 from dataclasses import dataclass
 
 from experimental.helmholtz_jax import RationalHelmholtzPropagator
-from experimental.rwp_jax import GaussSourceModel, TroposphereModel, ComputationalParams, AbstractNProfileModel, \
+from experimental.rwp_jax import RWPGaussSourceModel, TroposphereModel, RWPComputationalParams, AbstractNProfileModel, \
     create_rwp_model, EvaporationDuctModel, PiecewiseLinearNProfileModel
 import jax.numpy as jnp
 from experiments.optimization.node.objective_functions import bartlett, abs_bartlett
@@ -21,9 +21,9 @@ class RWPModel:
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: GaussSourceModel = GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src: RWPGaussSourceModel = RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
     env: TroposphereModel = TroposphereModel()
-    params: ComputationalParams = ComputationalParams(
+    params: RWPComputationalParams = RWPComputationalParams(
         max_range_m=50000,
         max_height_m=250,
         dx_m=100,

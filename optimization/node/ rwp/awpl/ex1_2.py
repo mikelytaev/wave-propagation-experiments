@@ -11,7 +11,7 @@ from matplotlib.lines import Line2D
 jax.config.update("jax_enable_x64", True)
 
 
-vis_model = RWPModel(params=ComputationalParams(
+vis_model = RWPModel(params=RWPComputationalParams(
         max_range_m=50000,
         max_height_m=250,
         dx_m=100,

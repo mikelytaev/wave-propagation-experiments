@@ -8,15 +8,15 @@ from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel
 from experiments.optimization.node.flax.utils import MLPWaveSpeedModel
 from experiments.optimization.node.objective_functions import bartlett
-from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
-    ComputationalParams, uwa_forward_task, uwa_get_model
+from experimental.uwa_jax import UWAGaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+    UWAComputationalParams, uwa_forward_task, uwa_get_model
 
 
 jax.config.update("jax_enable_x64", True)
 #logging.basicConfig(level=logging.DEBUG)
 
 
-src = GaussSourceModel(freq_hz=200.0, depth_m=50.0, beam_width_deg=10.0)
+src = UWAGaussSourceModel(freq_hz=200.0, depth_m=50.0, beam_width_deg=10.0)
 env_simulated = UnderwaterEnvironmentModel(
     layers=[
         UnderwaterLayerModel(
@@ -37,7 +37,7 @@ env_simulated = UnderwaterEnvironmentModel(
     ]
 )
 
-params = ComputationalParams(
+params = UWAComputationalParams(
     max_range_m=10000,
     max_depth_m=250,
     dx_m=500,

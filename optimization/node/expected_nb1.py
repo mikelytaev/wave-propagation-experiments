@@ -6,8 +6,8 @@ from matplotlib.colors import Normalize
 
 from experiments.optimization.node.expected import expected_value_jacfwd, expected_value_quad
 from experimental.helmholtz_jax import LinearSlopeWaveSpeedModel
-from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
-    ComputationalParams, uwa_get_model
+from experimental.uwa_jax import UWAGaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+    UWAComputationalParams, uwa_get_model
 
 # import jax
 # jax.config.update("jax_enable_x64", True)
@@ -19,7 +19,7 @@ from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, U
 # v = expected_value(func, 1.0, 1.0, 10)
 
 
-src = GaussSourceModel(freq_hz=50.0, depth_m=100.0, beam_width_deg=10.0)
+src = UWAGaussSourceModel(freq_hz=50.0, depth_m=100.0, beam_width_deg=10.0)
 env = UnderwaterEnvironmentModel(
     layers=[
         UnderwaterLayerModel(
@@ -40,7 +40,7 @@ env = UnderwaterEnvironmentModel(
     ]
 )
 
-params = ComputationalParams(
+params = UWAComputationalParams(
     max_range_m=100000,
     max_depth_m=500,
     x_output_points=300,

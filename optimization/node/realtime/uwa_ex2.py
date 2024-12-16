@@ -8,7 +8,7 @@ from networkx.algorithms.bipartite import color
 
 from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel
 from experiments.optimization.node.realtime.utils import get_field, realtime_inversion_model
-from experimental.uwa_jax import ComputationalParams, uwa_get_model
+from experimental.uwa_jax import UWAComputationalParams, uwa_get_model
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -294,7 +294,7 @@ env_vis = deepcopy(res_500_5.env)
 vis_model = uwa_get_model(
     src=res_500_5.src,
     env=env_vis,
-    params=ComputationalParams(
+    params=UWAComputationalParams(
         max_range_m=20000,
         max_depth_m=210,
         x_output_points=500,

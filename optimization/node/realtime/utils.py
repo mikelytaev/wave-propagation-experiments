@@ -11,14 +11,14 @@ from scipy.optimize import minimize
 from experimental.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
     PiecewiseLinearWaveSpeedModel, ConstWaveSpeedModel
 from experiments.optimization.node.objective_functions import bartlett
-from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
-    ComputationalParams, uwa_get_model
+from experimental.uwa_jax import UWAGaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+    UWAComputationalParams, uwa_get_model
 
 
 jax.config.update("jax_enable_x64", True)
 
 
-def get_field(model: RationalHelmholtzPropagator, src: GaussSourceModel, env: UnderwaterEnvironmentModel):
+def get_field(model: RationalHelmholtzPropagator, src: UWAGaussSourceModel, env: UnderwaterEnvironmentModel):
     c0 = env.layers[0].sound_speed_profile_m_s(src.depth_m)
     k0 = 2 * fm.pi * src.freq_hz / c0
     init = src.aperture(k0, model.z_computational_grid())
@@ -34,11 +34,11 @@ class RealtimeInversionModelResult:
     nfev_list: List[float]
     njev_list: List[float]
     env: UnderwaterEnvironmentModel
-    src: GaussSourceModel
+    src: UWAGaussSourceModel
 
 
 def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list, snr=None, gamma=1.0, arrays_num=1) -> RealtimeInversionModelResult:
-    src = GaussSourceModel(
+    src = UWAGaussSourceModel(
         freq_hz=freq_hz,
         depth_m=50.0,
         beam_width_deg=10.0
@@ -64,7 +64,7 @@ def realtime_inversion_model(freq_hz, range_to_vla_m, simulated_ssp_list, snr=No
     )
 
     max_depth_m = 250
-    computational_params = ComputationalParams(
+    computational_params = UWAComputationalParams(
         max_range_m=range_to_vla_m,
         max_depth_m=max_depth_m,
         dx_m=range_to_vla_m/5,

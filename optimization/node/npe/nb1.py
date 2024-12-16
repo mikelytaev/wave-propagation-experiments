@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 
 from experimental.helmholtz_jax import RationalHelmholtzPropagator
-from experimental.rwp_jax import GaussSourceModel, TroposphereModel, ComputationalParams, AbstractNProfileModel, \
+from experimental.rwp_jax import RWPGaussSourceModel, TroposphereModel, RWPComputationalParams, AbstractNProfileModel, \
     create_rwp_model, PiecewiseLinearNProfileModel
 import jax.numpy as jnp
 
@@ -22,9 +22,9 @@ class RWPModel:
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: GaussSourceModel = GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src: RWPGaussSourceModel = RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
     env: TroposphereModel = TroposphereModel()
-    params: ComputationalParams = ComputationalParams(
+    params: RWPComputationalParams = RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -85,7 +85,7 @@ def loss(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure, gamma
     return pwl_loss0(vals, z_grid, model, measure) + gamma*pwl_loss1(vals)
 
 
-model = RWPModel(params=ComputationalParams(
+model = RWPModel(params=RWPComputationalParams(
         max_range_m=7000,
         max_height_m=250,
         dx_m=100,

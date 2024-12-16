@@ -1,7 +1,7 @@
 from common import *
 
 
-inv_model_500mhz = RWPModel(params=ComputationalParams(
+inv_model_500mhz = RWPModel(params=RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -9,9 +9,9 @@ inv_model_500mhz = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1]*11,
     measure_points_z=[2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    src=GaussSourceModel(freq_hz=500e6, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=500e6, height_m=10.0, beam_width_deg=3.0)
 )
-inv_model_1ghz = RWPModel(params=ComputationalParams(
+inv_model_1ghz = RWPModel(params=RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -19,9 +19,9 @@ inv_model_1ghz = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1]*11,
     measure_points_z=[2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    src=GaussSourceModel(freq_hz=1E9, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=1E9, height_m=10.0, beam_width_deg=3.0)
 )
-inv_model_3ghz = RWPModel(params=ComputationalParams(
+inv_model_3ghz = RWPModel(params=RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -29,9 +29,9 @@ inv_model_3ghz = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1]*11,
     measure_points_z=[2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    src=GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 )
-inv_model_5ghz = RWPModel(params=ComputationalParams(
+inv_model_5ghz = RWPModel(params=RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -39,7 +39,7 @@ inv_model_5ghz = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1]*11,
     measure_points_z=[2, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-    src=GaussSourceModel(freq_hz=5E9, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=5E9, height_m=10.0, beam_width_deg=3.0)
 )
 inverted_profiles_freq500mhz, inversion_time_freq500mhz, nfev_list_freq500mhz = realtime(inv_model_500mhz, profiles, gamma=1e-3, snr=30)
 inverted_profiles_freq1ghz, inversion_time_freq1ghz, nfev_list_freq1ghz = realtime(inv_model_1ghz, profiles, gamma=1e-3, snr=30)

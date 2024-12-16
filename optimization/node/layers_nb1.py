@@ -5,7 +5,7 @@ from matplotlib.colors import Normalize
 
 from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel
-from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.uwa_jax import UWAComputationalParams, UWAGaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task, UnderwaterLayerModel
 import math as fm
 
@@ -16,7 +16,7 @@ from uwa.field import AcousticPressureField
 logging.basicConfig(level=logging.DEBUG)
 
 
-src = GaussSourceModel(freq_hz=200.0, depth_m=100.0, beam_width_deg=10.0)
+src = UWAGaussSourceModel(freq_hz=200.0, depth_m=100.0, beam_width_deg=10.0)
 env = UnderwaterEnvironmentModel(
     layers=[
         UnderwaterLayerModel(
@@ -37,7 +37,7 @@ env = UnderwaterEnvironmentModel(
     ]
 )
 
-params = ComputationalParams(
+params = UWAComputationalParams(
     max_range_m=50000,
     max_depth_m=500,
     x_output_points=500,

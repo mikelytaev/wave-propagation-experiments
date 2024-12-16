@@ -25,16 +25,16 @@ class ExplicitMLP(nn.Module):
 
 class MLPWaveSpeedModel(AbstractWaveSpeedModel):
 
-    def __init__(self, c0: float = 1500.0, z_max_m = 100.0, params=None):
+    def __init__(self, c0: float = 1500.0, z_max_m = 100.0, layers=None, params=None):
         self.c0 = c0
-        self.mlp = ExplicitMLP(features=[500]*10 + [1])
+        self.mlp = ExplicitMLP(features=layers + [1])
         self.z_max_m = z_max_m
         self.params = params if params else self.mlp.init(random.key(0), jnp.ones((1, 1)))
 
     def apply(self, params, z):
         z = 2 * jnp.array(z) / self.z_max_m - 1
         z = z.reshape(len(z), 1)
-        return self.c0 + self.mlp.apply(params, z)[:,0]
+        return self.c0 + self.mlp.apply(params, z)[:, 0]
 
     def __call__(self, z):
         return self.apply(self.params, z)
@@ -56,7 +56,7 @@ tree_util.register_pytree_node(MLPWaveSpeedModel,
 
 class MLPNProfileModel(AbstractNProfileModel):
 
-    def __init__(self, n0: float = 0.0, z_max_m = 100.0, layers=None, params=None):
+    def __init__(self, n0: float = 0.0, z_max_m=100.0, layers=None, params=None):
         self.n0 = n0
         self.mlp = ExplicitMLP(features=layers + [1])
         self.z_max_m = z_max_m

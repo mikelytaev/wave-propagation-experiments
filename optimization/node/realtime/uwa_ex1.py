@@ -7,7 +7,7 @@ from matplotlib.colors import Normalize
 
 from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel, RationalHelmholtzPropagator
-from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.uwa_jax import UWAComputationalParams, UWAGaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, UnderwaterLayerModel
 from experiments.optimization.node.objective_functions import bartlett
 import math as fm
@@ -22,7 +22,7 @@ import time
 jax.config.update("jax_enable_x64", True)
 
 
-src = GaussSourceModel(
+src = UWAGaussSourceModel(
     freq_hz=200.0,
     depth_m=50.0,
     beam_width_deg=10.0
@@ -47,7 +47,7 @@ env_simulated = UnderwaterEnvironmentModel(
     ]
 )
 
-computational_params = ComputationalParams(
+computational_params = UWAComputationalParams(
     max_range_m=10000,
     max_depth_m=250,
     x_output_points=5,
@@ -61,7 +61,7 @@ simulated_model = uwa_get_model(
 )
 
 
-def get_field(model: RationalHelmholtzPropagator, src: GaussSourceModel, env: UnderwaterEnvironmentModel):
+def get_field(model: RationalHelmholtzPropagator, src: UWAGaussSourceModel, env: UnderwaterEnvironmentModel):
     c0 = env.layers[0].sound_speed_profile_m_s(src.depth_m)
     #c0 = 1500.0
     k0 = 2 * fm.pi * src.freq_hz / c0
@@ -268,7 +268,7 @@ env_vis = deepcopy(env_simulated)
 vis_model = uwa_get_model(
     src=src,
     env=env_vis,
-    params=ComputationalParams(
+    params=UWAComputationalParams(
         max_range_m=20000,
         max_depth_m=210,
         x_output_points=500,

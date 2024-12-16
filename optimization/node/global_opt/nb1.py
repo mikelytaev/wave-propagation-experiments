@@ -12,12 +12,12 @@ from scipy.optimize import minimize, basinhopping, dual_annealing
 from experimental.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
     PiecewiseLinearWaveSpeedModel, ConstWaveSpeedModel
 from experiments.optimization.node.objective_functions import bartlett
-from experimental.uwa_jax import GaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
-    ComputationalParams, uwa_get_model
+from experimental.uwa_jax import UWAGaussSourceModel, UnderwaterEnvironmentModel, UnderwaterLayerModel, \
+    UWAComputationalParams, uwa_get_model
 
 jax.config.update("jax_enable_x64", True)
 
-src = GaussSourceModel(
+src = UWAGaussSourceModel(
         freq_hz=500,
         depth_m=50.0,
         beam_width_deg=10.0
@@ -44,7 +44,7 @@ env_simulated = UnderwaterEnvironmentModel(
 )
 
 max_depth_m = 250
-computational_params = ComputationalParams(
+computational_params = UWAComputationalParams(
     max_range_m=5000,
     max_depth_m=max_depth_m,
     dx_m=5000/5,
@@ -61,7 +61,7 @@ arrays_num = 1
 measure_points_depth = jnp.array([5, 10, 20, 30, 40, 50, 60, 70])
 measure_points_range = -jnp.arange(1, arrays_num+1, 1)
 
-def get_field(model: RationalHelmholtzPropagator, src: GaussSourceModel, env: UnderwaterEnvironmentModel):
+def get_field(model: RationalHelmholtzPropagator, src: UWAGaussSourceModel, env: UnderwaterEnvironmentModel):
     c0 = env.layers[0].sound_speed_profile_m_s(src.depth_m)
     k0 = 2 * fm.pi * src.freq_hz / c0
     init = src.aperture(k0, model.z_computational_grid())

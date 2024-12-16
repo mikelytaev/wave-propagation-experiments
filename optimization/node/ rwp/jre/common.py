@@ -12,7 +12,7 @@ profiles += [p2 * (1-t) + p3 * t for t in jnp.linspace(0, 1, 20)]
 
 z_grid = jnp.linspace(0, 150, 251)
 
-inv_model = RWPModel(params=ComputationalParams(
+inv_model = RWPModel(params=RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,

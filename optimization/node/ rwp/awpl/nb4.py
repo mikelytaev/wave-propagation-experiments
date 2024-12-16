@@ -39,7 +39,7 @@ def loss(vals: jnp.ndarray, model: RWPModel, measure):
     return pwl_loss0(vals, model, measure) + gamma*pwl_loss1(vals, model, measure)
 
 
-inv_model = RWPModel(params=ComputationalParams(
+inv_model = RWPModel(params=RWPComputationalParams(
         max_range_m=20000,
         max_height_m=250,
         dx_m=1000,

@@ -65,7 +65,7 @@ plt.show()
 
 plot_rel_error(profiles, inverted_profiles, z_grid)
 
-vis_model = RWPModel(params=ComputationalParams(
+vis_model = RWPModel(params=RWPComputationalParams(
         max_range_m=50000,
         max_height_m=250,
         dx_m=100,

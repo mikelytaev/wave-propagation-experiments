@@ -1,21 +1,34 @@
+import time
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import List
+from typing import List, Sequence
 
 import jax
 import numpy as np
 import optax
 from jax import numpy as jnp, tree_util
 
-from experimental.helmholtz_jax import RationalHelmholtzPropagator
-from experimental.rwp_jax import GaussSourceModel, TroposphereModel, ComputationalParams, create_rwp_model, \
+from experimental.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
+    PiecewiseLinearWaveSpeedModel, ConstWaveSpeedModel
+from experimental.rwp_jax import RWPGaussSourceModel, TroposphereModel, RWPComputationalParams, create_rwp_model, \
     AbstractNProfileModel, PiecewiseLinearNProfileModel
+from experimental.uwa_jax import UWAGaussSourceModel, UWAComputationalParams, uwa_get_model, UnderwaterEnvironmentModel, \
+    UnderwaterLayerModel
 
 from experiments.optimization.node.objective_functions import bartlett
 
 
-def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002):
-    model.apply_N_profile(profile_model)
+@dataclass
+class OptResult:
+    res_profile: AbstractNProfileModel
+    start_profile: AbstractNProfileModel
+    loss_vals: Sequence[float]
+    time_s: float
+    ground_truth_errors: Sequence[float] = None
+
+
+def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, ground_truth_profile: AbstractNProfileModel=None):
+    model.apply_profile(profile_model)
     tx = optax.adam(learning_rate=learning_rate)
 
     opt_params = model.env.N_profile.params
@@ -27,6 +40,15 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002):
     best_params = None
     best_counter = 0
 
+    loss_vals = []
+    if ground_truth_profile is not None:
+        z_grid = jnp.linspace(0, profile_model.max_height_m(), 200)
+        ground_truth_errors = []
+    else:
+        ground_truth_errors = None
+
+    t_profile = deepcopy(profile_model)
+    t = time.time()
     for i in range(10000):
         #l0 = loss0(opt_params, model, measure)
         #l1 = loss1(opt_params, model)
@@ -34,7 +56,14 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002):
         loss_val, grads = loss_grad_fn(opt_params, model, measure, gamma)
         updates, opt_state = tx.update(grads, opt_state)
         opt_params = optax.apply_updates(opt_params, updates)
-        print(f'i = {i}; Loss = {loss_val}')
+
+        loss_vals += [loss_val]
+        if ground_truth_profile is not None:
+            t_profile.params = opt_params
+            ground_truth_errors += [jnp.linalg.norm(ground_truth_profile(z_grid) - t_profile(z_grid)) / jnp.linalg.norm(ground_truth_profile(z_grid))]
+
+        if i % 25 == 0:
+            print(f'i = {i}; Loss = {loss_val}')
 
         if loss_val < best_loss:
             best_loss = loss_val
@@ -46,11 +75,19 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002):
         if best_counter > 25:
             break
 
-    res_model = deepcopy(profile_model)
-    res_model.params = best_params
-    start_model = deepcopy(profile_model)
-    start_model.params = opt_params_0
-    return best_params, opt_params_0
+    time_s = time.time() - t
+
+    res_profile = deepcopy(profile_model)
+    res_profile.params = best_params
+    start_profile = deepcopy(profile_model)
+    start_profile.params = opt_params_0
+    return OptResult(
+        loss_vals=loss_vals,
+        start_profile=start_profile,
+        res_profile=res_profile,
+        time_s=time_s,
+        ground_truth_errors=ground_truth_errors
+    )
 
 
 @dataclass
@@ -58,9 +95,9 @@ class RWPModel:
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: GaussSourceModel = GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src: RWPGaussSourceModel = RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
     env: TroposphereModel = TroposphereModel()
-    params: ComputationalParams = ComputationalParams(
+    params: RWPComputationalParams = RWPComputationalParams(
         max_range_m=5000,
         max_height_m=250,
         dx_m=100,
@@ -79,8 +116,61 @@ class RWPModel:
         return f[self.measure_points_x, self.measure_points_z]
 
 
-    def apply_N_profile(self, N_profile: AbstractNProfileModel):
+    def apply_profile(self, N_profile: AbstractNProfileModel):
         self.env.N_profile = N_profile
+        return self.get_replica()
+
+
+@dataclass
+class UWAModel:
+    measure_points_x: List[int] = None
+    measure_points_z: List[int] = None
+    fwd_model: RationalHelmholtzPropagator = None
+    src: UWAGaussSourceModel = UWAGaussSourceModel(freq_hz=200, depth_m=10.0, beam_width_deg=3.0)
+    env: UnderwaterEnvironmentModel = UnderwaterEnvironmentModel(
+        layers=[
+            UnderwaterLayerModel(
+                height_m=200.0,
+                sound_speed_profile_m_s=PiecewiseLinearWaveSpeedModel(
+                    z_grid_m=jnp.array([0.0, 200.0]),
+                    sound_speed=jnp.array([1500.0, 1500.0])
+                ),
+                density=1.0,
+                attenuation_dm_lambda=0.0
+            ),
+            UnderwaterLayerModel(
+                height_m=jnp.inf,
+                sound_speed_profile_m_s=ConstWaveSpeedModel(c0=1700.0),
+                density=1.5,
+                attenuation_dm_lambda=0.0
+            )
+        ]
+    )
+    params: UWAComputationalParams = UWAComputationalParams(
+        max_range_m=5000,
+        max_depth_m=250,
+        dx_m=100,
+        dz_m=1
+    )
+
+    def __post_init__(self):
+        self.fwd_model = uwa_get_model(self.src, self.env, self.params)
+
+    def calc_field(self, sound_speed: AbstractWaveSpeedModel):
+        self.env.layers[0].sound_speed_profile_m_s = sound_speed
+        c0 = self.env.layers[0].sound_speed_profile_m_s(jnp.array([self.src.depth_m]))[0]
+        k0 = 2 * jnp.pi * self.src.freq_hz / c0
+        return self.fwd_model.compute(self.src.aperture(k0, self.fwd_model.z_computational_grid()))
+
+    def get_replica(self):
+        c0 = self.env.layers[0].sound_speed_profile_m_s(jnp.array([self.src.depth_m]))[0]
+        k0 = 2 * jnp.pi * self.src.freq_hz / c0
+        f = self.fwd_model.compute(self.src.aperture(k0, self.fwd_model.z_computational_grid()))
+        return f[self.measure_points_x, self.measure_points_z]
+
+
+    def apply_profile(self, sound_speed: AbstractWaveSpeedModel):
+        self.env.layers[0].sound_speed_profile_m_s = sound_speed
         return self.get_replica()
 
 

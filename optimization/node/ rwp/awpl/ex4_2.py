@@ -2,7 +2,7 @@ from common import *
 from matplotlib.lines import Line2D
 
 
-inv_model_ver5_6 = RWPModel(params=ComputationalParams(
+inv_model_ver5_6 = RWPModel(params=RWPComputationalParams(
         max_range_m=25000,
         max_height_m=250,
         dx_m=100,
@@ -10,9 +10,9 @@ inv_model_ver5_6 = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1]*6,
     measure_points_z=[50, 60, 70, 80, 90, 99],
-    src=GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 )
-inv_model_ver5_hor = RWPModel(params=ComputationalParams(
+inv_model_ver5_hor = RWPModel(params=RWPComputationalParams(
         max_range_m=26000,
         max_height_m=250,
         dx_m=100,
@@ -20,7 +20,7 @@ inv_model_ver5_hor = RWPModel(params=ComputationalParams(
     ),
     measure_points_x=[-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11],
     measure_points_z=[70]*11,
-    src=GaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
+    src=RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 )
 
 inverted_profiles_ver5_6, _, _ = realtime(inv_model_ver5_6, profiles, gamma=1e-3, snr=30)

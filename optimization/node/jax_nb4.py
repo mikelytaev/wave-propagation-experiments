@@ -3,7 +3,7 @@ import numpyro
 from matplotlib.colors import Normalize
 
 from experimental.helmholtz_jax import LinearSlopeWaveSpeedModel
-from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.uwa_jax import UWAComputationalParams, UWAGaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task
 from uwa.environment import *
 import math as fm
@@ -14,12 +14,12 @@ import numpyro.distributions as dist
 import matplotlib.pyplot as plt
 
 
-src = GaussSourceModel(freq_hz=50, depth_m=100, beam_width_deg=10)
+src = UWAGaussSourceModel(freq_hz=50, depth_m=100, beam_width_deg=10)
 env = UnderwaterEnvironmentModel(
     sound_speed_profile_m_s=LinearSlopeWaveSpeedModel(c0=1500, slope_degrees=1),
     bottom_profile=lambda x: x*0 + 1000
 )
-params = ComputationalParams(
+params = UWAComputationalParams(
     max_range_m=50000,
     max_depth_m=500,
     x_output_points=10,

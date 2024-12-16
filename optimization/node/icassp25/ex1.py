@@ -3,7 +3,7 @@ from matplotlib.colors import Normalize
 
 from experimental.helmholtz_jax import PiecewiseLinearWaveSpeedModel, \
     ConstWaveSpeedModel
-from experimental.uwa_jax import ComputationalParams, GaussSourceModel, UnderwaterEnvironmentModel, \
+from experimental.uwa_jax import UWAComputationalParams, UWAGaussSourceModel, UnderwaterEnvironmentModel, \
     uwa_get_model, uwa_forward_task, UnderwaterLayerModel
 from experiments.optimization.node.objective_functions import bartlett
 import math as fm
@@ -18,7 +18,7 @@ import optax
 #logging.basicConfig(level=logging.DEBUG)
 
 
-src = GaussSourceModel(freq_hz=500.0, depth_m=50.0, beam_width_deg=10.0)
+src = UWAGaussSourceModel(freq_hz=500.0, depth_m=50.0, beam_width_deg=10.0)
 env_simulated = UnderwaterEnvironmentModel(
     layers=[
         UnderwaterLayerModel(
@@ -39,7 +39,7 @@ env_simulated = UnderwaterEnvironmentModel(
     ]
 )
 
-params = ComputationalParams(
+params = UWAComputationalParams(
     max_range_m=2000,
     max_depth_m=250,
     x_output_points=3,

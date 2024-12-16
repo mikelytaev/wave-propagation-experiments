@@ -16,7 +16,7 @@ def evaporation_loss0(height_m: float, model: RWPModel, measure):
     return Bartlett_loss(val, measure)
 
 
-inv_model = RWPModel(params=ComputationalParams(
+inv_model = RWPModel(params=RWPComputationalParams(
         max_range_m=150000,
         max_height_m=250,
         dx_m=100,
