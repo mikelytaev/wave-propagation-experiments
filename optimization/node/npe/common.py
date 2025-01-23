@@ -11,7 +11,7 @@ from jax import numpy as jnp, tree_util
 from experimental.helmholtz_jax import RationalHelmholtzPropagator, AbstractWaveSpeedModel, \
     PiecewiseLinearWaveSpeedModel, ConstWaveSpeedModel
 from experimental.rwp_jax import RWPGaussSourceModel, TroposphereModel, RWPComputationalParams, create_rwp_model, \
-    AbstractNProfileModel, PiecewiseLinearNProfileModel
+    AbstractNProfileModel, PiecewiseLinearNProfileModel, EvaporationDuctModel
 from experimental.uwa_jax import UWAGaussSourceModel, UWAComputationalParams, uwa_get_model, UnderwaterEnvironmentModel, \
     UnderwaterLayerModel
 
@@ -27,11 +27,13 @@ class OptResult:
     ground_truth_errors: Sequence[float] = None
 
 
-def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, ground_truth_profile: AbstractNProfileModel=None):
+def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, batch_size=None, stop_criteria=25, ground_truth_profile: AbstractNProfileModel=None):
+    if batch_size is None:
+        batch_size = len(measure)
     model.apply_profile(profile_model)
     tx = optax.adam(learning_rate=learning_rate)
 
-    opt_params = model.env.N_profile.params
+    opt_params = profile_model.params
     opt_params_0 = deepcopy(opt_params)
     opt_state = tx.init(opt_params)
     loss_grad_fn = jax.value_and_grad(loss)
@@ -49,11 +51,14 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, ground_
 
     t_profile = deepcopy(profile_model)
     t = time.time()
+    batch_key = jax.random.PRNGKey(42)
     for i in range(10000):
-        #l0 = loss0(opt_params, model, measure)
-        #l1 = loss1(opt_params, model)
-        #print(f'l0 = {l0}; l1 = {l1}')
-        loss_val, grads = loss_grad_fn(opt_params, model, measure, gamma)
+        batch_index = jax.random.permutation(batch_key, 10)[0:batch_size]
+        l0 = loss0(opt_params, model, measure, batch_index)
+        l1 = loss1(opt_params, model)
+        print(f'l0 = {l0}; l1 = {gamma*l1}')
+        loss_val, grads = loss_grad_fn(opt_params, model, measure, gamma, batch_index)
+        batch_key = jax.random.split(batch_key, 1)[0]
         updates, opt_state = tx.update(grads, opt_state)
         opt_params = optax.apply_updates(opt_params, updates)
 
@@ -72,7 +77,7 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, ground_
         else:
             best_counter += 1
 
-        if best_counter > 25:
+        if best_counter > stop_criteria:
             break
 
     time_s = time.time() - t
@@ -90,8 +95,12 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, ground_
     )
 
 
+class AbstractModel:
+    pass
+
+
 @dataclass
-class RWPModel:
+class RWPModel(AbstractModel):
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
@@ -120,13 +129,25 @@ class RWPModel:
         self.env.N_profile = N_profile
         return self.get_replica()
 
+    def set_profile(self, N_profile: AbstractNProfileModel):
+        self.env.N_profile = N_profile
+
+    def z_max(self):
+        return self.env.max_height_m()
+
+    def set_params(self, params):
+        self.env.N_profile.params = params
+
+    def profile(self, z):
+        return self.env.N_profile(z)
+
 
 @dataclass
-class UWAModel:
+class UWAModel(AbstractModel):
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: UWAGaussSourceModel = UWAGaussSourceModel(freq_hz=200, depth_m=10.0, beam_width_deg=3.0)
+    src: UWAGaussSourceModel = UWAGaussSourceModel(freq_hz=200, depth_m=50.0, beam_width_deg=10.0)
     env: UnderwaterEnvironmentModel = UnderwaterEnvironmentModel(
         layers=[
             UnderwaterLayerModel(
@@ -153,6 +174,9 @@ class UWAModel:
         dz_m=1
     )
 
+    def z_max(self):
+        return self.env.layers[0].sound_speed_profile_m_s.support()[1]
+
     def __post_init__(self):
         self.fwd_model = uwa_get_model(self.src, self.env, self.params)
 
@@ -173,6 +197,14 @@ class UWAModel:
         self.env.layers[0].sound_speed_profile_m_s = sound_speed
         return self.get_replica()
 
+    def set_profile(self, sound_speed: AbstractWaveSpeedModel):
+        self.env.layers[0].sound_speed_profile_m_s = sound_speed
+
+    def set_params(self, params):
+        self.env.layers[0].sound_speed_profile_m_s.params = params
+
+    def profile(self, z):
+        return self.env.layers[0].sound_speed_profile_m_s(z)
 
 def Bartlett_loss(val, measure):
     etalon_loss0_v = 1 / bartlett(measure, measure)
@@ -194,24 +226,24 @@ def hvp(f, primals, tangents):
     return jax.jvp(jax.grad(f), primals, tangents)[1]
 
 
-def operator(params, model: RWPModel):
-    model.env.N_profile.params = params
+def operator(params, model: AbstractModel):
+    model.set_params(params)
     return model.get_replica()
 
 
-def loss0(params, model: RWPModel, measure):
+def loss0(params, model: AbstractModel, measure, batch_index):
     val = operator(params, model)
-    return Bartlett_loss(val, measure)
+    return Bartlett_loss(val[batch_index], measure[batch_index])#jnp.linalg.norm(abs(val[batch_index]) - abs(measure[batch_index]))#
 
 
-def loss1(params, model: RWPModel):
-    model.env.N_profile.params = params
-    z_grid_m = jnp.linspace(0, model.env.max_height_m()+20, 201)
-    return jnp.linalg.norm(jnp.diff(model.env.N_profile(z_grid_m))) ** 2
+def loss1(params, model: AbstractModel):
+    model.set_params(params)
+    z_grid_m = jnp.linspace(0, model.z_max()+20, 201)
+    return jnp.linalg.norm(jnp.diff(model.profile(z_grid_m))) ** 2
 
 
-def loss(params, model: RWPModel, measure, gamma):
-    return loss0(params, model, measure) + gamma*loss1(params, model)
+def loss(params, model: AbstractModel, measure, gamma, batch_index):
+    return loss0(params, model, measure, batch_index) + gamma*loss1(params, model)
 
 
 class PLNPM(PiecewiseLinearNProfileModel):
@@ -242,3 +274,7 @@ surface_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 100]), jnp.array
 elevated_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 100, 150, 300]), jnp.array([20, 20, 0, 0]))
 surface_based_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([10.0, 30, 0, 0]))
 surface_based_duct2_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 120, 100]), jnp.array([30.0, 30, 0, 0]))
+
+evaporation_duct_N = EvaporationDuctModel(height_m=25)
+elevated_evaporation_duct_N = EvaporationDuctModel(height_m=35) + PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([0.0, 10, 0, 0]))
+surface_based_duct3_N = PiecewiseLinearNProfileModel(jnp.array([0, 45, 75, 100]), jnp.array([10.0, 25, 0, 0]))

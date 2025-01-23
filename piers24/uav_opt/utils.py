@@ -4,16 +4,12 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
-from scipy.interpolate import interp1d
 
 from rwp.antennas import GaussAntenna
 from rwp.environment import Troposphere, Impediment, Terrain
 from rwp.field import Field
 from rwp.sspade import RWPSSpadeComputationalParams, rwp_ss_pade, SSPadeZOrder
-from rwp.terrain import inv_geodesic_problem
 from rwp.vis import FieldVisualiser
-
-import importlib
 
 
 @dataclass
@@ -112,23 +108,3 @@ def solution(
     return src_vis, dst_vis, src_bw_vis, dst_bw_vis, merge_vis, opt_link_margin_vis
 
 
-def get_elevation_func(lat1: float, long1: float, lat2: float, long2: float, n_points: int):
-    from podpac.datalib.terraintiles import TerrainTiles
-    from podpac import Coordinates
-    from podpac import settings
-
-    settings['DEFAULT_CACHE'] = ['disk']
-    node = TerrainTiles(tile_format='geotiff', zoom=11)
-    coords, x_grid = inv_geodesic_problem(lat1, long1, lat2, long2, n_points)
-    lats = [c[0] for c in coords]
-    lons = [c[1] for c in coords]
-    c = Coordinates([lats, lons], dims=['lat', 'lon'])
-    o = node.eval(c)
-    eval = np.array([o.data[i, i] for i in range(0, len(x_grid))])
-    eval[np.isnan(eval)] = 0
-    eval = np.array([max(a, 0) for a in eval])
-
-    #podpac делает какую-то дичь с логгером
-    importlib.reload(logging)
-
-    return interp1d(x=x_grid, y=eval, fill_value="extrapolate")

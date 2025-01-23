@@ -11,7 +11,7 @@ from experimental.rwp_jax import RWPGaussSourceModel, RWPComputationalParams, Pi
 import jax.numpy as jnp
 
 from experimental.uwa_jax import UWAComputationalParams
-from experiments.optimization.node.flax.utils import MLPNProfileModel
+from experiments.optimization.node.flax.utils import MLPNProfileModel, MLPWaveSpeedModel
 from experiments.optimization.node.npe.common import adam, RWPModel, add_noise, surface_based_duct_N, surface_duct_N, \
     elevated_duct_N, surface_based_duct2_N, UWAModel
 from matplotlib.lines import Line2D
@@ -19,7 +19,7 @@ from matplotlib.lines import Line2D
 jax.config.update("jax_enable_x64", True)
 
 model = UWAModel(params=UWAComputationalParams(
-        max_range_m=5000,
+        max_range_m=10000,
         max_depth_m=250,
         dx_m=100,
         dz_m=1
@@ -29,14 +29,14 @@ model = UWAModel(params=UWAComputationalParams(
 )
 
 p1 = PiecewiseLinearWaveSpeedModel(
-                z_grid_m=jnp.array([0.0, 200.0]),
-                sound_speed=jnp.array([1500.0, 1500.0])
-            )
+            z_grid_m=jnp.array([0.0, 75, 200]),
+            sound_speed=jnp.array([1500, (1510+1500.0)/2, 1510])
+        )
 
 measure_p1 = add_noise(model.apply_profile(p1), 30)
 
-layers = [50]*4
-p1_opt_res = adam(model, measure_p1, learning_rate=0.05, profile_model=MLPNProfileModel(z_max_m=200.0, layers=layers))
+layers = [50]*8
+p1_opt_res = adam(model, measure_p1, learning_rate=0.002, gamma=100.0, profile_model=MLPWaveSpeedModel(z_max_m=200.0, layers=layers, c0=1510.0))
 z_grid_o = jnp.linspace(0, 200, 250)
 
 f, ax = plt.subplots(1, 4, figsize=(6, 3.4), constrained_layout=True)
@@ -55,12 +55,11 @@ f.tight_layout()
 
 plt.show()
 
-vis_model = RWPModel(params=RWPComputationalParams(
-        max_range_m=102000,
-        max_height_m=250,
+vis_model = UWAModel(params=UWAComputationalParams(
+        max_range_m=30000,
+        max_depth_m=250,
         dx_m=100,
         dz_m=1),
-    src=RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 )
 f1 = vis_model.calc_field(surface_based_duct2_N)
 f, ax = plt.subplots(1, 1, figsize=(6, 3.2), constrained_layout=True)

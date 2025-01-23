@@ -37,11 +37,18 @@ class MLPWaveSpeedModel(AbstractWaveSpeedModel):
         return self.c0 + self.mlp.apply(params, z)[:, 0]
 
     def __call__(self, z):
-        return self.apply(self.params, z)
+        vals = self.apply(self.params, z)
+        return jnp.where(z < self.z_max_m, vals, self.c0)
+
+    def support(self):
+        return 0.0, self.z_max_m
 
     def _tree_flatten(self):
         dynamic = (self.c0, self.params)
-        static = {'z_max_m': self.z_max_m}
+        static = {
+            'z_max_m': self.z_max_m,
+            'layers': self.mlp.features[:-1]
+        }
         return dynamic, static
 
     @classmethod
