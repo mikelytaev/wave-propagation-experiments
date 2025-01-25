@@ -16,6 +16,7 @@ from experimental.uwa_jax import UWAGaussSourceModel, UWAComputationalParams, uw
     UnderwaterLayerModel
 
 from experiments.optimization.node.objective_functions import bartlett
+from uwa.environment import munk_profile
 
 
 @dataclass
@@ -270,6 +271,32 @@ tree_util.register_pytree_node(PLNPM,
                                PLNPM._tree_flatten,
                                PLNPM._tree_unflatten)
 
+
+class PLWSM(PiecewiseLinearWaveSpeedModel):
+
+    @property
+    def params(self):
+        return self.sound_speed
+
+    @params.setter
+    def params(self, value):
+        self.sound_speed = value
+
+    def _tree_flatten(self):
+        dynamic = (self.z_grid_m, self.sound_speed)
+        static = {}
+        return dynamic, static
+
+    @classmethod
+    def _tree_unflatten(cls, static, dynamic):
+        return cls(z_grid_m=dynamic[0], sound_speed=dynamic[1])
+
+
+tree_util.register_pytree_node(PLWSM,
+                               PLWSM._tree_flatten,
+                               PLWSM._tree_unflatten)
+
+
 surface_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 100]), jnp.array([20.0, 0, 0]))
 elevated_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 100, 150, 300]), jnp.array([20, 20, 0, 0]))
 surface_based_duct_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([10.0, 30, 0, 0]))
@@ -278,3 +305,22 @@ surface_based_duct2_N = PiecewiseLinearNProfileModel(jnp.array([0, 50, 120, 100]
 evaporation_duct_N = EvaporationDuctModel(height_m=25)
 elevated_evaporation_duct_N = EvaporationDuctModel(height_m=35) + PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([0.0, 10, 0, 0]))
 surface_based_duct3_N = PiecewiseLinearNProfileModel(jnp.array([0, 45, 75, 100]), jnp.array([10.0, 25, 0, 0]))
+
+ssp_1 = PiecewiseLinearWaveSpeedModel(
+            z_grid_m=jnp.array([0.0, 75, 200]),
+            sound_speed=jnp.array([1510, (1500+1500.0)/2, 1510])
+        )
+
+z_grid = jnp.linspace(0, 200, 200)
+munk_profile = PiecewiseLinearWaveSpeedModel(
+            z_grid_m=z_grid,
+            sound_speed=munk_profile(z_grid, ref_depth=150)
+    )
+thermocline_profile = PiecewiseLinearWaveSpeedModel(
+            z_grid_m=jnp.array([0.0, 50, 150, 200]),
+            sound_speed=jnp.array([1510.0, 1510, 1500, 1500])
+        )
+slope_profile = PiecewiseLinearWaveSpeedModel(
+            z_grid_m=jnp.array([0.0, 200]),
+            sound_speed=jnp.array([1500.0, 1510])
+        )

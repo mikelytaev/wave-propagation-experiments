@@ -154,7 +154,7 @@ plt.plot(surface_based_duct2_opt_res.ground_truth_errors, label="Surface based d
 plt.plot(surface_based_duct_opt_res.ground_truth_errors, label="Mixed duct")
 plt.xlim([0, 250])
 plt.xlabel("Iteration number")
-plt.ylabel("Loss")
+plt.ylabel("Rel. error")
 plt.yscale("log")
 plt.grid(True)
 plt.legend()
