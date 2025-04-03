@@ -3,9 +3,9 @@ import jax.numpy as jnp
 from utils import *
 
 
-p1 = PiecewiseLinearNProfileModel(jnp.array([0, 50, 100]), jnp.array([10.0, 0, 0]))
-p2 = PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([10.0, 30, 0, 0]))
-p3 = PiecewiseLinearNProfileModel(jnp.array([0, 50]), jnp.array([0.0, 0]))
+p1 = PiecewiseLinearNProfileModel(jnp.array([0, 50, 100]), jnp.array([10, 0, 0]))
+p2 = PiecewiseLinearNProfileModel(jnp.array([0, 50, 75, 100]), jnp.array([10, 30, 0, 0]))
+p3 = PiecewiseLinearNProfileModel(jnp.array([0, 50]), jnp.array([10, 10]))
 
 profiles = [p1 * (1-t) + p2 * t for t in jnp.linspace(0, 1, 20)]
 profiles += [p2 * (1-t) + p3 * t for t in jnp.linspace(0, 1, 20)]

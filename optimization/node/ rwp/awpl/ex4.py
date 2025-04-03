@@ -53,11 +53,11 @@ inv_model_ver25 = RWPModel(params=RWPComputationalParams(
     src=RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
 )
 
-inverted_profiles_ver5, _, _ = realtime(inv_model_ver5, profiles, gamma=1e-3, snr=30)
-inverted_profiles_ver5_6, _, _ = realtime(inv_model_ver5_6, profiles, gamma=1e-3, snr=30)
-inverted_profiles_ver5_hor, _, _ = realtime(inv_model_ver5_hor, profiles, gamma=1e-3, snr=30)
-inverted_profiles_ver10, _, _ = realtime(inv_model_ver10, profiles, gamma=1e-3, snr=30)
-inverted_profiles_ver25, _, _ = realtime(inv_model_ver25, profiles, gamma=1e-3, snr=30)
+inverted_profiles_ver5, _, _, loss_ver5 = realtime(inv_model_ver5, profiles, gamma=1e-3, snr=30)
+inverted_profiles_ver5_6, _, _, loss_ver5_6 = realtime(inv_model_ver5_6, profiles, gamma=1e-3, snr=30)
+inverted_profiles_ver5_hor, _, _, loss_ver5_hor = realtime(inv_model_ver5_hor, profiles, gamma=1e-3, snr=30)
+inverted_profiles_ver10, _, _, loss_ver10 = realtime(inv_model_ver10, profiles, gamma=1e-3, snr=30)
+inverted_profiles_ver25, _, _, loss_ver25 = realtime(inv_model_ver25, profiles, gamma=1e-3, snr=30)
 
 errors_ver5 = get_rel_errors(profiles, inverted_profiles_ver5, z_grid)
 errors_ver5_6 = get_rel_errors(profiles, inverted_profiles_ver5_6, z_grid)
@@ -113,4 +113,20 @@ legend_elements = [Line2D([0], [0], color='black', lw=1, label='True profile'),
                    ]
 f.legend(handles=legend_elements, loc='lower center', bbox_to_anchor=(0.5, -0.00), ncol=3)
 f.tight_layout()
+plt.show()
+
+
+plt.figure(figsize=(6, 2.8))
+plt.xlabel("Time step number")
+plt.ylabel("Rel. error")
+plt.plot(loss_ver5, label='Ver 11 elem., R = 5 km', color='blue')
+plt.plot(loss_ver10, label='Ver 11 elem., R = 10 km', linestyle='-', color='green')
+plt.plot(loss_ver25, label='Ver 11 elem., R = 25 km', linestyle='-', color='red')
+plt.plot(loss_ver5_hor, label='Hor 11 elem., R = 5 km', linestyle='--', color='blue')
+plt.plot(loss_ver5_6, label='Ver 6 elem., R = 5 km', linestyle='--', color='red')
+plt.grid(True)
+plt.xlim([0, len(profiles) - 1])
+plt.ylim([0.0, 0.5])
+plt.tight_layout()
+plt.legend()
 plt.show()

@@ -68,7 +68,7 @@ def hvp(f, primals, tangents):
 
 
 def pwl_operator(z_grid: jnp.ndarray, vals: jnp.ndarray, model: RWPModel):
-    return model.apply_N_profile(PiecewiseLinearNProfileModel(z_grid, jnp.concat((vals, jnp.array([0.0])))))
+    return model.apply_N_profile(PiecewiseLinearNProfileModel(z_grid, jnp.concat((jnp.array([10.0]), vals))))
 
 
 def pwl_loss0(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure):
@@ -77,7 +77,7 @@ def pwl_loss0(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure):
 
 
 def pwl_loss1(vals: jnp.ndarray):
-    return (jnp.linalg.norm(jnp.diff(jnp.concat((vals, jnp.array([0.0]))))))**2
+    return (jnp.linalg.norm(jnp.diff(jnp.concat((jnp.array([10.0]), vals)))))**2
 
 
 def loss(vals: jnp.ndarray, z_grid: jnp.ndarray, model: RWPModel, measure, gamma):
@@ -93,6 +93,7 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
     inverted_profiles = [PiecewiseLinearNProfileModel(z_grid, true_profiles[0](z_grid))]
     inversion_time = [0.0]
     nfev_list = [0]
+    losses_list = [0]
     for ind, true_profile in enumerate(true_profiles, start=1):
         measure = model.apply_N_profile(true_profile)
         measure = add_noise(measure, snr)
@@ -102,7 +103,7 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
             method='L-BFGS-B',
             fun=loss,
             args=(z_grid, model, measure, gamma),
-            x0=inverted_profiles[-1](z_grid)[:-1:],
+            x0=inverted_profiles[-1](z_grid)[1::],
             jac=jac,
             options={
                 'maxfun': 150,
@@ -110,9 +111,10 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
             #callback=lambda xk: print(
             #    f'{pwl_loss0(xk, z_grid, model, measure)} {gamma * pwl_loss1(xk)}'),
         )
+        losses_list += [m.fun]
         inversion_time += [time.time() - t]
         nfev_list += [m.nfev]
-        inverted_profiles += [PiecewiseLinearNProfileModel(z_grid, jnp.concat((m.x, jnp.array([0.0]))))]
+        inverted_profiles += [PiecewiseLinearNProfileModel(z_grid, jnp.concat((jnp.array([10.0]), m.x)))]
         print(f'Step: {ind}/{len(true_profiles)}')
 
     t = time.time()
@@ -129,7 +131,7 @@ def realtime(model: RWPModel, true_profiles: List[AbstractNProfileModel], snr=30
 
     print(f'fwd_time: {fwd_time} s; jac_time: {jac_time} s; vg_time: {vg_time}')
 
-    return inverted_profiles, inversion_time, nfev_list
+    return inverted_profiles, inversion_time, nfev_list, losses_list
 
 
 def get_rel_errors(orig_profiles: List[AbstractNProfileModel], inverted_profiles: List[AbstractNProfileModel], z_grid):

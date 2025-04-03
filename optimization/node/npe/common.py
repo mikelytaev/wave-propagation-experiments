@@ -54,7 +54,7 @@ def adam(model, measure, profile_model, gamma=1E-3, learning_rate=0.002, batch_s
     t = time.time()
     batch_key = jax.random.PRNGKey(42)
     for i in range(10000):
-        batch_index = jax.random.permutation(batch_key, 10)[0:batch_size]
+        batch_index = jax.random.permutation(batch_key, len(measure))[0:batch_size]
         l0 = loss0(opt_params, model, measure, batch_index)
         l1 = loss1(opt_params, model)
         print(f'l0 = {l0}; l1 = {gamma*l1}')
