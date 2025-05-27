@@ -72,7 +72,6 @@ def loss(model: RationalApproximation, dx_beta, a, b, n=10):
     return jnp.linalg.norm(model(xi_grid) - operator_symbol(dx_beta, xi_grid))
 
 
-#model = RationalApproximation(order=(7, 8))
 model = RationalApproximation.create_pade(dx_beta=1.0, order=(7, 8))
 model(jnp.array([1, 2]))
 
@@ -112,13 +111,15 @@ def plot_error(model, dx_beta, a, b):
     pade_model = RationalApproximation.create_pade(dx_beta=dx_beta, order=model.order)
     pointwise_error = abs(model(xi_grid) - operator_symbol(dx_beta, xi_grid))
     pointwise_error_pade = abs(pade_model(xi_grid) - operator_symbol(dx_beta, xi_grid))
-    # plt.plot(xi_grid, jnp.log10(pointwise_error), xi_grid, jnp.log10(pointwise_error_pade))
-    # plt.grid(True)
-    # plt.show()
-    #
-    # plt.plot(xi_grid, jnp.log(model(xi_grid)).real, xi_grid, jnp.log(pade_model(xi_grid)).real)
-    # plt.grid(True)
-    # plt.show()
+    plt.figure()
+    plt.plot(xi_grid, jnp.log10(pointwise_error), xi_grid, jnp.log10(pointwise_error_pade))
+    plt.grid(True)
+    plt.show()
+
+    plt.figure()
+    plt.plot(xi_grid, jnp.log(model(xi_grid)).real, xi_grid, jnp.log(pade_model(xi_grid)).real)
+    plt.grid(True)
+    plt.show()
 
     plt.figure()
     plt.scatter([a.real for a in pade_model.a_coefs], [a.imag for a in pade_model.a_coefs])

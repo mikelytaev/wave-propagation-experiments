@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Sequence
 
 import jax
@@ -105,13 +105,16 @@ class RWPModel(AbstractModel):
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: RWPGaussSourceModel = RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0)
-    env: TroposphereModel = TroposphereModel()
-    params: RWPComputationalParams = RWPComputationalParams(
-        max_range_m=5000,
-        max_height_m=250,
-        dx_m=100,
-        dz_m=1
+    src: RWPGaussSourceModel = field(
+        default_factory=lambda: RWPGaussSourceModel(freq_hz=3E9, height_m=10.0, beam_width_deg=3.0))
+    env: TroposphereModel = field(default_factory=TroposphereModel)
+    params: RWPComputationalParams = field(
+        default_factory=lambda: RWPComputationalParams(
+            max_range_m=5000,
+            max_height_m=250,
+            dx_m=100,
+            dz_m=1
+        )
     )
 
     def __post_init__(self):
@@ -148,31 +151,37 @@ class UWAModel(AbstractModel):
     measure_points_x: List[int] = None
     measure_points_z: List[int] = None
     fwd_model: RationalHelmholtzPropagator = None
-    src: UWAGaussSourceModel = UWAGaussSourceModel(freq_hz=200, depth_m=50.0, beam_width_deg=10.0)
-    env: UnderwaterEnvironmentModel = UnderwaterEnvironmentModel(
-        layers=[
-            UnderwaterLayerModel(
-                height_m=200.0,
-                sound_speed_profile_m_s=PiecewiseLinearWaveSpeedModel(
-                    z_grid_m=jnp.array([0.0, 200.0]),
-                    sound_speed=jnp.array([1500.0, 1500.0])
+    src: UWAGaussSourceModel = field(
+        default_factory=lambda: UWAGaussSourceModel(freq_hz=200, depth_m=50.0, beam_width_deg=10.0))
+    env: UnderwaterEnvironmentModel = field(
+        default_factory=lambda:
+            UnderwaterEnvironmentModel(
+            layers=[
+                UnderwaterLayerModel(
+                    height_m=200.0,
+                    sound_speed_profile_m_s=PiecewiseLinearWaveSpeedModel(
+                        z_grid_m=jnp.array([0.0, 200.0]),
+                        sound_speed=jnp.array([1500.0, 1500.0])
+                    ),
+                    density=1.0,
+                    attenuation_dm_lambda=0.0
                 ),
-                density=1.0,
-                attenuation_dm_lambda=0.0
-            ),
-            UnderwaterLayerModel(
-                height_m=jnp.inf,
-                sound_speed_profile_m_s=ConstWaveSpeedModel(c0=1700.0),
-                density=1.5,
-                attenuation_dm_lambda=0.0
-            )
-        ]
+                UnderwaterLayerModel(
+                    height_m=jnp.inf,
+                    sound_speed_profile_m_s=ConstWaveSpeedModel(c0=1700.0),
+                    density=1.5,
+                    attenuation_dm_lambda=0.0
+                )
+            ]
+        )
     )
-    params: UWAComputationalParams = UWAComputationalParams(
-        max_range_m=5000,
-        max_depth_m=250,
-        dx_m=100,
-        dz_m=1
+    params: UWAComputationalParams = field(
+        default_factory=lambda: UWAComputationalParams(
+            max_range_m=5000,
+            max_depth_m=250,
+            dx_m=100,
+            dz_m=1
+        )
     )
 
     def z_max(self):

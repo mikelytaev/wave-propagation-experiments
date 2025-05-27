@@ -1,5 +1,8 @@
 import numpy as np
 import tensorflow as tf
+
+import experiments.optimization.node.npe.rwp_mimo.common
+
 print("TensorFlow version:", tf.__version__)
 import tensorflow_probability as tfp
 import math as fm
@@ -27,7 +30,7 @@ loss_fn3 = lambda: tf.sqrt(tf.reduce_sum((discrete_k_x() - tf.math.sqrt(k0 ** 2 
 loss_fn4 = lambda: 1/k0*tf.reduce_max(tf.abs(discrete_k_x() - tf.math.sqrt(k0 ** 2 - k_z_grid_tf ** 2)))
 
 trace_fn = lambda traceable_quantities: {
-  'loss': traceable_quantities.loss, 'num_coef': num_coef}
+  'loss': experiments.optimization.node.npe.rwp_mimo.common.loss, 'num_coef': num_coef}
 
 lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
     initial_learning_rate=0.3,
