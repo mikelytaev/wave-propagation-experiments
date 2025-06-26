@@ -92,7 +92,7 @@ def learn_inverse_G(
     def cycle_loss_fn(inv_G: DeepONet, batched_args, args_grid):
         batched_vals = batched_G(batched_args)
         predictions = jax.vmap(inv_G, in_axes=(0, None))(batched_vals, args_grid)
-        return jnp.mean(jnp.square(predictions - batched_args))
+        return jnp.mean(jnp.square(predictions - batched_args)) / batch_size
         #return jnp.mean(jnp.square(batched_G(predictions) - batched_vals))
 
     @nnx.jit
